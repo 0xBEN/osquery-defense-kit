@@ -1,0 +1,797 @@
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the exceptions for the Application Layer Firewall in OSX.
+    --
+    -- tags: postmortem
+    SELECT
+      *
+    FROM
+      alf_exceptions;
+  description: Retrieves the exceptions for the Application Layer Firewall in OSX.
+  name: 'Incident Response: Alf Exceptions Macos'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the list of processes with explicit authorization for the Application Layer Firewall.
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      alf_explicit_auths;
+  description: Retrieves the list of processes with explicit authorization for the Application Layer Firewall.
+  name: 'Incident Response: Alf Explicit Auths Macos'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the services for the Application Layer Firewall in OSX.
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      alf_services;
+  description: Retrieves the services for the Application Layer Firewall in OSX.
+  name: 'Incident Response: Alf Services'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the configuration values for the Application Layer Firewall for OSX.
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      alf;
+  description: Retrieves the configuration values for the Application Layer Firewall for OSX.
+  name: 'Incident Response: Alf'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the list of application scheme/protocol-based IPC handlers.
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      app_schemes;
+  description: Retrieves the list of application scheme/protocol-based IPC handlers.
+  name: 'Incident Response: App Schemes'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the currently installed applications in the target OSX system.
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      apps;
+  description: Retrieves all the currently installed applications in the target OSX system.
+  name: 'Incident Response: Apps'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all block devices known to the system
+    -- platform: posix
+    -- tags: postmortem seldom
+    SELECT
+      *
+    FROM
+      block_devices
+  description: Retrieves all block devices known to the system
+  name: 'Incident Response: Block Devices'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Crontab entries
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      crontab
+  description: Crontab entries
+  name: 'Incident Response: Crontab'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the current disk encryption status for the target system.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      disk_encryption;
+  description: Retrieves the current disk encryption status for the target system.
+  name: 'Incident Response: Disk Encryption'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Return the list of configured DNS servers on this system
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      dns_resolvers;
+  description: Return the list of configured DNS servers on this system
+  name: 'Incident Response: Dns Resolvers'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Return the list of running Docker containers on this machine
+    --
+    -- tags: postmortem
+    -- platform: linux
+    SELECT
+      *
+    FROM
+      docker_containers
+  description: Return the list of running Docker containers on this machine
+  name: 'Incident Response: Docker Containers'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Return the Docker image history on a machine
+    --
+    -- tags: postmortem
+    -- platform: linux
+    SELECT
+      *
+    FROM
+      docker_image_history
+  description: Return the Docker image history on a machine
+  name: 'Incident Response: Docker Image History'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the entries in the target system /etc/hosts file.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      etc_hosts;
+  description: Retrieves all the entries in the target system /etc/hosts file.
+  name: 'Incident Response: Etc Hosts'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves software packages with access to listening in on keyboard/mouse events
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      event_taps;
+  description: Retrieves software packages with access to listening in on keyboard/mouse events
+  name: 'Incident Response: Event Taps Macos'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the gatekeeper exceptions on a macOS host
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      gap.ctime,
+      gap.mtime,
+      gap.path,
+      file.mtime,
+      file.uid,
+      file.ctime,
+      file.gid,
+      hash.sha256,
+      signature.identifier,
+      signature.authority
+    FROM
+      gatekeeper_approved_apps AS gap
+      LEFT JOIN file ON gap.path = file.path
+      LEFT JOIN hash ON gap.path = hash.path
+      LEFT JOIN signature ON gap.path = signature.path
+    GROUP BY
+      gap.requirement
+  description: Retrieves all the gatekeeper exceptions on a macOS host
+  name: 'Incident Response: Gatekeeper Macos'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the current status of IP/IPv6 forwarding.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      system_controls
+    WHERE
+      oid = '4.30.41.1'
+    UNION
+    SELECT
+      *
+    FROM
+      system_controls
+    WHERE
+      oid = '4.2.0.1';
+  description: Retrieves the current status of IP/IPv6 forwarding.
+  name: 'Incident Response: Ip Forwarding'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the current filters and chains per filter in the target system.
+    --
+    -- tags: postmortem
+    -- platform: linux
+    SELECT
+      *
+    FROM
+      iptables;
+  description: Retrieves the current filters and chains per filter in the target system.
+  name: 'Incident Response: Iptables'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the information for the current kernel modules in the target Linux system.
+    --
+    -- tags: postmortem
+    -- platform: linux
+    SELECT
+      *
+    FROM
+      kernel_modules;
+  description: Retrieves all the information for the current kernel modules in the target Linux system.
+  name: 'Incident Response: Kernel Modules Linux'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the information about the current kernel extensions for the target OSX system.
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      kernel_extensions;
+  description: Retrieves all the information about the current kernel extensions for the target OSX system.
+  name: 'Incident Response: Kextstat Macos'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the list of the latest logins with PID, username and timestamp.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      last;
+  description: Retrieves the list of the latest logins with PID, username and timestamp.
+  name: 'Incident Response: Last'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- macOS launchd entries
+    --
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      launchd;
+  description: macOS launchd entries
+  name: 'Incident Response: Launchd Macos'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the listening ports in the target system.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      listening_ports;
+  description: Retrieves all the listening ports in the target system.
+  name: 'Incident Response: Listening Ports'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the list of all the currently logged in users in the target system.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      liu.*,
+      p.name,
+      p.cmdline,
+      p.cwd,
+      p.root
+    FROM
+      logged_in_users liu,
+      processes p
+    WHERE
+      liu.pid = p.pid;
+  description: Retrieves the list of all the currently logged in users in the target system.
+  name: 'Incident Response: Logged In Users'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the values for the loginwindow process in the target OSX system.
+    --
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    select
+      key,
+      subkey,
+      value
+    from
+      plist
+    where
+      path = '/Library/Preferences/com.apple.loginwindow.plist';
+  description: Retrieves all the values for the loginwindow process in the target OSX system.
+  name: 'Incident Response: Loginwindow1'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the values for the loginwindow process in the target OSX system.
+    --
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    select
+      key,
+      subkey,
+      value
+    from
+      plist
+    where
+      path = '/Library/Preferences/loginwindow.plist';
+  description: Retrieves all the values for the loginwindow process in the target OSX system.
+  name: 'Incident Response: Loginwindow2'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the values for the loginwindow process in the target OSX system.
+    --
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    select
+      username,
+      key,
+      subkey,
+      value
+    from
+      plist p,
+      (
+        select
+          *
+        from
+          users
+        where
+          directory like '/Users/%'
+      ) u
+    where
+      p.path = u.directory || '/Library/Preferences/com.apple.loginwindow.plist';
+  description: Retrieves all the values for the loginwindow process in the target OSX system.
+  name: 'Incident Response: Loginwindow3'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the values for the loginwindow process in the target OSX system.
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    select
+      username,
+      key,
+      subkey,
+      value
+    from
+      plist p,
+      (
+        select
+          *
+        from
+          users
+        where
+          directory like '/Users/%'
+      ) u
+    where
+      p.path = u.directory || '/Library/Preferences/loginwindow.plist';
+  description: Retrieves all the values for the loginwindow process in the target OSX system.
+  name: 'Incident Response: Loginwindow4'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the current list of mounted drives in the target system.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      mounts;
+  description: Retrieves the current list of mounted drives in the target system.
+  name: 'Incident Response: Mounts'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the open files per process in the target system.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT DISTINCT
+      pof.pid,
+      pof.path,
+      p.name,
+      p.cmdline
+    FROM
+      process_open_files pof
+      LEFT JOIN processes p ON pof.pid = p.pid
+    WHERE
+      pof.path NOT LIKE '/private/var/folders%'
+      AND pof.path NOT LIKE '/System/Library/%'
+      AND pof.path NOT IN ('/dev/null', '/dev/urandom', '/dev/random');
+  description: Retrieves all the open files per process in the target system.
+  name: 'Incident Response: Open Files'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the open sockets per process in the target system.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT DISTINCT
+      pid,
+      family,
+      protocol,
+      local_address,
+      local_port,
+      remote_address,
+      remote_port,
+      path
+    FROM
+      process_open_sockets
+    WHERE
+      path <> ''
+      or remote_address <> '';
+  description: Retrieves all the open sockets per process in the target system.
+  name: 'Incident Response: Open Sockets'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the environment variables per process in the target system.
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      process_envs;
+  description: Retrieves all the environment variables per process in the target system.
+  name: 'Incident Response: Process Env'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Recently executed programs
+    --
+    -- interval: 900
+    -- platform: posix
+    SELECT
+      pe.*,
+      -- pe.cwd is often blank
+      p.cwd AS delayed_proc_cwd,
+      pp.cwd AS delayed_parent_cwd,
+      pp.path AS parent_path,
+      pp.name AS delayed_parent_name
+    FROM
+      process_events pe
+      LEFT JOIN processes p ON pe.pid = p.pid
+      LEFT JOIN processes pp ON pe.parent = pp.pid
+    WHERE
+      pe.time > (strftime('%s', 'now') -900)
+      -- Filter out commands generated by osquery/kolide
+      AND pe.cmdline NOT LIKE '/bin/ps -x -o%'
+      AND parent_path NOT LIKE '/usr/local/kolide-k2/%/launcher'
+    GROUP BY
+      pe.pid,
+      pe.eid
+  description: Recently executed programs
+  name: 'Incident Response: Process Events'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the memory map per process
+    -- platform: posix
+    -- tags: postmortem
+    SELECT
+      *
+    FROM
+      process_memory_map;
+  description: Retrieves the memory map per process
+  name: 'Incident Response: Process Memory Map'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Currently running programs
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      processes
+  description: Currently running programs
+  name: 'Incident Response: Processes'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the list of recent items opened in OSX by parsing the plist per user.
+    -- tags: postmortem
+    -- platform: darwin
+    select
+      username,
+      key,
+      value
+    from
+      plist p,
+      (
+        select
+          *
+        from
+          users
+        where
+          directory like '/Users/%'
+      ) u
+    where
+      p.path = u.directory || '/Library/Preferences/com.apple.recentitems.plist';
+  description: Retrieves the list of recent items opened in OSX by parsing the plist per user.
+  name: 'Incident Response: Recent Items Macos'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Lists the application bundle that owns a sandbox label.
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      sandboxes;
+  description: Lists the application bundle that owns a sandbox label.
+  name: 'Incident Response: Sandboxes Macos'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves the command history, per user, by parsing the shell history files.
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      users
+      JOIN shell_history USING (uid);
+  description: Retrieves the command history, per user, by parsing the shell history files.
+  name: 'Incident Response: Shell History'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieve most programs that are part of a systems startup (multi-platform)
+    --
+    -- tags: postmortem
+    SELECT
+      *
+    FROM
+      startup_items;
+  description: Retrieve most programs that are part of a systems startup (multi-platform)
+  name: 'Incident Response: Startup Items'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves setuid-enabled executables in well-known paths
+    --
+    -- platform: posix
+    -- tags: postmortem
+    SELECT
+      *
+    FROM
+      suid_bin;
+  description: Retrieves setuid-enabled executables in well-known paths
+  name: 'Incident Response: Suid Bin'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Returns a list of systemd units
+    --
+    -- tags: postmortem
+    -- platform: linux
+    SELECT
+      *
+    FROM
+      systemd_units;
+  description: Returns a list of systemd units
+  name: 'Incident Response: Systemd Units'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Returns a list of users
+    --
+    -- tags: postmortem
+    -- platform: posix
+    SELECT
+      *
+    FROM
+      users
+  description: Returns a list of users
+  name: 'Incident Response: Users'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Retrieves all the remembered wireless network that the target machine has connected to.
+    SELECT
+      ssid,
+      network_name,
+      security_type,
+      last_connected,
+      captive_portal,
+      possibly_hidden,
+      roaming,
+      roaming_profile
+    FROM
+      wifi_networks;
+  description: Retrieves all the remembered wireless network that the target machine has connected to.
+  name: 'Incident Response: Wireless Networks Macos'
+kind: query
+
+---
+apiVersion: v1
+spec:
+  query: |
+    -- Returns a list of malware matches from macOS XProtect
+    --
+    -- tags: postmortem
+    -- platform: darwin
+    SELECT
+      *
+    FROM
+      xprotect_reports;
+  description: Returns a list of malware matches from macOS XProtect
+  name: 'Incident Response: Xprotect Reports'
+kind: query
+
