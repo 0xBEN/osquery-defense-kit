@@ -110,8 +110,13 @@ WHERE
   AND NOT (
     cmd IN (
       '/usr/bin/csrutil status',
-      '/usr/bin/csrutil report'
+      '/usr/bin/csrutil report',
+      '/bin/launchctl list',
+      '/bin/launchctl asuser 0 /bin/launchctl list'
     )
     AND p.parent = -1
   )
   AND NOT cmd LIKE '/bin/rm -f /tmp/periodic.%'
+  AND NOT cmd LIKE 'rm -f /tmp/locate%/_updatedb%'
+  AND NOT cmd LIKE 'rm -f /tmp/locate%/mklocate%/_mklocatedb%'
+  AND NOT cmd LIKE 'touch -r /tmp/KSInstallAction.%'

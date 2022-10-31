@@ -60,6 +60,9 @@ WHERE
   AND p.path NOT LIKE '/System/Applications/%'
   AND p.path NOT LIKE '/System/Library/%'
   AND p.path NOT LIKE '/Users/%/Library/%.app/Contents/MacOS/%'
+  AND p.path NOT LIKE '/Users/%/code/%'
+  AND p.path NOT LIKE '/Users/%/src/%'
+  AND p.path NOT LIKE '/Users/%/bin/%'
   AND p.path NOT LIKE '/System/%'
   AND p.path NOT LIKE '/opt/homebrew/Cellar/%/bin/%'
   AND p.path NOT LIKE '/usr/libexec/%'
@@ -126,6 +129,7 @@ WHERE
     '22,6,500,Cyberduck,ch.sudo.cyberduck,Developer ID Application: David Kocher (G69SCX94XU)',
     '22,6,500,ssh,,',
     '22,6,500,ssh,com.apple.openssh,Software Signing',
+    '22,6,500,ssh,com.apple.ssh,Software Signing',
     '22,6,500,ssh,ssh,',
     '22,6,500,ssh,ssh-55554944fbf65684ab9b37c2bad3a27ef78b23f4,',
     '30004,6,500,java,net.java.openjdk.java,Developer ID Application: Microsoft Corporation (UBF8T346G9)',
@@ -135,6 +139,7 @@ WHERE
     '43,6,500,DropboxMacUpdate,com.dropbox.DropboxMacUpdate,Developer ID Application: Dropbox, Inc. (G7HH3F8CAK)',
     '443,17,500,Code Helper,com.microsoft.VSCode.helper,Developer ID Application: Microsoft Corporation (UBF8T346G9)',
     '443,17,500,Evernote Helper,com.evernote.Evernote.helper,Apple Mac OS Application Signing',
+    '443,17,500,GitKraken Boards,com.axosoft.glo,Apple iPhone OS Application Signing',
     '443,17,500,Reflect Helper,app.reflect.ReflectDesktop,Developer ID Application: Reflect App, LLC (789ULN5MZB)',
     '443,17,500,Slack Helper,,',
     '443,6,0,com.apple.MobileSoftwareUpdate.UpdateBrainService,com.apple.MobileSoftwareUpdate.UpdateBrainService,Software Signing',
@@ -155,6 +160,7 @@ WHERE
     '443,6,500,cloud_sql_proxy,a.out,',
     '443,6,500,Code Helper,com.microsoft.VSCode.helper,Developer ID Application: Microsoft Corporation (UBF8T346G9)',
     '443,6,500,Code Helper (Renderer),com.github.Electron.helper,Developer ID Application: Microsoft Corporation (UBF8T346G9)',
+    '443,6,500,com.docker.backend,com.docker,Developer ID Application: Docker Inc (9BNSXJN65R)',
     '443,6,500,cosign,,',
     '443,6,500,cosign,a.out,',
     '443,6,500,cosign,cosign,',
@@ -167,6 +173,7 @@ WHERE
     '443,6,500,docker-credential-gcr,a.out,',
     '443,6,500,Electron,com.microsoft.VSCode,Developer ID Application: Microsoft Corporation (UBF8T346G9)',
     '443,6,500,emacs-28.2,emacs-28.2,',
+    '443,6,500,Evernote Helper,,',
     '443,6,500,Evernote Helper,com.evernote.Evernote.helper,Apple Mac OS Application Signing',
     '443,6,500,figma_agent,com.figma.agent,Developer ID Application: Figma, Inc. (T8RA8NE3B7)',
     '443,6,500,FlyDelta,com.delta.iphone.ver1,Apple iPhone OS Application Signing',
@@ -178,10 +185,6 @@ WHERE
     '443,6,500,GitKraken Boards,com.axosoft.glo,Apple iPhone OS Application Signing',
     '443,6,500,git-remote-http,,',
     '443,6,500,git-remote-http,com.apple.git-remote-http,Software Signing',
-    '443,6,500,git-remote-http,git-remote-http-555549448cff17dcad50330caee64c85205e6a99,',
-    '443,6,500,git-remote-http,git-remote-http-5555494493930c47f9d9385e94cdee8b19968153,',
-    '443,6,500,git-remote-http,git-remote-http-55554944ce011d0e889a3cf58e5ac97ac15728f3,',
-    '443,6,500,git-remote-http,git-remote-http-55554944e5dca79a2b44332e941af547708b0c68,',
     '443,6,500,gitsign,,',
     '443,6,500,gitsign,a.out,',
     '443,6,500,gitsign,gitsign,',
@@ -205,6 +208,7 @@ WHERE
     '443,6,500,ngrok,darwin_amd64,Developer ID Application: ngrok LLC (TEX8MHRDQ9)',
     '443,6,500,nix,nix,',
     '443,6,500,node,node,Developer ID Application: Node.js Foundation (HX7739G8FX)',
+    '443,6,500,old,dev.warp.Warp-Stable,Developer ID Application: Denver Technologies, Inc (2BBY89MBSN)',
     '443,6,500,OneDriveStandaloneUpdater,com.microsoft.OneDriveStandaloneUpdater,Developer ID Application: Microsoft Corporation (UBF8T346G9)',
     '443,6,500,prober,a.out,',
     '443,6,500,provisio,,',
@@ -217,17 +221,21 @@ WHERE
     '443,6,500,Python,Python,',
     '443,6,500,Reflect,app.reflect.ReflectDesktop,Developer ID Application: Reflect App, LLC (789ULN5MZB)',
     '443,6,500,Reflect Helper,app.reflect.ReflectDesktop,Developer ID Application: Reflect App, LLC (789ULN5MZB)',
+    '443,6,500,release-notes,a.out,',
     '443,6,500,sample,com.apple.dt.SamplingTools.sample,Software Signing',
     '443,6,500,scorecard-darwin-amd64,,',
     '443,6,500,Slack Helper,,',
     '443,6,500,Slack Helper,com.tinyspeck.slackmacgap.helper,Apple Mac OS Application Signing',
     '443,6,500,Slack Helper,com.tinyspeck.slackmacgap.helper,Developer ID Application: Slack Technologies, Inc. (BQR82RBBHL)',
+    '443,6,500,snyk,snyk_darwin_amd64,Developer ID Application: Snyk Limited (97QYW7LHSF)',
     '443,6,500,steam_osx,com.valvesoftware.steam,Developer ID Application: Valve Corporation (MXGJJ98X76)',
     '443,6,500,step,step,',
     '443,6,500,sublime_text,com.sublimetext.4,Developer ID Application: Sublime HQ Pty Ltd (Z6D26JE4Y4)',
     '443,6,500,syft,syft,Developer ID Application: ANCHORE, INC. (9MJHKYX5AT)',
     '443,6,500,terraform-ls,terraform-ls,Developer ID Application: Hashicorp, Inc. (D38WU7D763)',
+    '443,17,500,Evernote Helper,,',
     '443,6,500,terraform,terraform,Developer ID Application: Hashicorp, Inc. (D38WU7D763)',
+    '443,6,500,trivy,a.out,',
     '443,6,500,vegeta,a.out,',
     '443,6,500,vim,vim,',
     '443,6,500,zoom.us,us.zoom.xos,Developer ID Application: Zoom Video Communications, Inc. (BJ4HAAB9B3)',
@@ -242,7 +250,11 @@ WHERE
     '80,6,500,ksfetch,ksfetch,Developer ID Application: Google LLC (EQHXZ8M8AV)',
     '80,6,500,steam_osx,com.valvesoftware.steam,Developer ID Application: Valve Corporation (MXGJJ98X76)',
     '80,6,500,webhook.test,a.out,'
-  ) -- nix-shell infects children with open connections
+  )
+
+  -- There are many signing hashes for git
+  AND NOT exception_key LIKE '443,6,500,git-remote-http,git-remote-http-%'
+  -- nix-shell infects children with open connections
   AND NOT (
     parent_cmd LIKE '%/tmp/nix-shell%'
     AND remote_port = 443

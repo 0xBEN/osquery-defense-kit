@@ -47,9 +47,12 @@ WHERE
     '/usr/bin/abrt-dump-journal-xorg',
     '/usr/bin/anacron',
     '/usr/bin/apcupsd',
+    '/usr/bin/clamscan',
     '/usr/bin/containerd',
     '/usr/bin/containerd-shim-runc-v2',
     '/usr/bin/crond',
+    '/usr/bin/dbus-daemon',
+    '/usr/bin/dbus-launch',
     '/usr/bin/dockerd',
     '/usr/bin/docker-proxy',
     '/usr/bin/fish',
@@ -72,8 +75,11 @@ WHERE
     '/usr/libexec/snapd/snapd',
     '/usr/libexec/sssd/sssd_kcm',
     '/usr/libexec/udisks2/udisksd',
+    '/usr/libexec/xdg-document-portal',
+    '/usr/libexec/xdg-permission-store',
     '/usr/lib/flatpak-system-helper',
     '/usr/lib/gdm-session-worker',
+    '/usr/lib/snapd/snapd',
     '/usr/lib/software-properties/software-properties-dbus',
     '/usr/lib/systemd/systemd',
     '/usr/lib/systemd/systemd-homed',
@@ -101,6 +107,8 @@ WHERE
   )
   -- Because I don't want to whitelist all of Python3
   AND p.cmdline NOT IN (
+    'xargs logger -s',
+    '/usr/bin/xargs',
     '/usr/bin/python3 -s /usr/sbin/firewalld --nofork --nopid',
     '/usr/bin/python /usr/bin/firewalld --nofork --nopid',
     '/usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal',

@@ -103,7 +103,7 @@ WHERE
     OR cmd LIKE '%sh -i'
     OR cmd LIKE '%socat%'
     OR cmd LIKE '%SOCK_STREAM%'
-    OR cmd LIKE '%Socket.%'
+    OR (cmd LIKE '%Socket.%' AND NOT cmd LIKE '%ipc-socket%')
   ) -- Things that could reasonably happen at boot.
   AND NOT (
     p.path IN ('/usr/bin/kmod', '/bin/kmod')
@@ -133,3 +133,7 @@ WHERE
   AND NOT cmd LIKE '%modprobe overlay'
   AND NOT cmd LIKE '%modprobe aufs'
   AND NOT cmd IN ('lsmod')
+  -- Seen on Ubuntu
+  AND NOT cmd LIKE 'rm -f /tmp/apt-key-gpghome.%/pubring.gpg'
+  AND NOT cmd LIKE 'rm -f /var/tmp/mkinitramfs_%'
+  AND NOT cmd LIKE 'rm -f -- /tmp/%'

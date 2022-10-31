@@ -37,18 +37,27 @@ WHERE
   AND (p.start_time - MAX(f.ctime, f.btime)) < 180
   AND p.start_time >= MAX(f.ctime, f.ctime)
   AND NOT f.directory IN ('/usr/lib/firefox', '/usr/local/kolide-k2/bin') -- Typically daemons or long-running desktop apps
+  -- These are binaries that are known to get updated and subsequently executed
   AND NOT p.path IN (
     '',
     '/opt/google/chrome/chrome',
+    '/opt/google/chrome/chrome_crashpad_handler',
+    '/opt/google/chrome/nacl_helper',
     '/usr/bin/containerd',
     '/usr/bin/dockerd',
+    '/usr/bin/bash',
     '/usr/bin/gedit',
     '/usr/bin/obs',
+    '/usr/bin/docker-proxy',
+    '/usr/lib/google-cloud-sdk/platform/bundledpythonunix/bin/python3',
+    '/usr/lib/snapd/snapd',
     '/usr/bin/pipewire',
     '/usr/bin/tailscaled',
     '/usr/bin/udevadm',
+    '/usr/bin/cargo',
     '/usr/lib/at-spi2-registryd',
     '/usr/lib/at-spi-bus-launcher',
+    '/usr/libexec/docker/docker-proxy',
     '/usr/libexec/fwupd/fwupd',
     '/usr/libexec/sssd/sssd_kcm',
     '/usr/lib/fwupd/fwupd',
@@ -65,6 +74,7 @@ WHERE
     '/usr/lib/systemd/systemd-timesyncd',
     '/usr/lib/x86_64-linux-gnu/obs-plugins/obs-browser-page',
     '/usr/lib/xf86-video-intel-backlight-helper',
+    '/usr/bin/containerd-shim-runc-v2',
     '/usr/sbin/chronyd',
     '/usr/sbin/cupsd',
     '/usr/sbin/tailscaled'
@@ -78,6 +88,7 @@ WHERE
   AND NOT p.path LIKE '/nix/store/%/bin/%'
   AND NOT p.path LIKE '/usr/local/bin/%'
   AND NOT p.path LIKE '/usr/local/Cellar/%'
+  AND NOT p.path LIKE '/home/%/.local/share/Steam/ubuntu12_64/%'
   AND NOT p.path LIKE '/usr/local/kolide-k2/bin/osqueryd-updates/%/osqueryd'
   AND NOT p.path LIKE '%/.vscode/extensions/%'
   AND NOT pp.path IN ('/usr/bin/gnome-shell') -- Filter out developers working on their own code

@@ -32,6 +32,7 @@ WHERE
   AND p.path NOT LIKE '/System/Library/%'
   AND p.path NOT LIKE '/System/Applications/%'
   AND p.path NOT LIKE '/Library/Apple/System/Library/%'
+  AND p.path NOT LIKE '/home/%/.local/share/Steam/steamapps/%'
   AND name NOT IN (
     'bash',
     'bwrap',
@@ -39,13 +40,14 @@ WHERE
     'emacs',
     'firefox',
     'fish',
+    'fleet_backend',
+    'fsdaemon',
     'GoogleSoftwareUpdateAgent',
     'gopls',
     'java',
     'launcher',
     'LogiFacecamService',
     'nautilus',
-    'systemd',
     'nessusd',
     'nix',
     'osqueryd',
@@ -53,16 +55,23 @@ WHERE
     'qemu-system-x86',
     'qemu-system-x86-64',
     'slack',
+    'steam',
+    'systemd',
     'wineserver',
     'ykman-gui',
     'zsh'
   )
   AND NOT p.path IN (
+    '/usr/bin/apt',
+    '/usr/bin/darktable',
     '/usr/bin/dockerd',
     '/usr/bin/gnome-shell',
     '/usr/bin/udevadm',
     '/usr/libexec/aned',
+    '/usr/libexec/coreduetd',
+    '/usr/libexec/flatpak-system-helper',
     '/usr/libexec/logd',
+    '/usr/libexec/logd_helper',
     '/usr/libexec/packagekitd',
     '/usr/libexec/PerfPowerServices',
     '/usr/libexec/signpost_reporter',

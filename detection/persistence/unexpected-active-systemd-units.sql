@@ -10,6 +10,8 @@
 SELECT
   description AS 'desc',
   fragment_path AS path,
+  MAX(user, "root") AS effective_user,
+  following,
   hash.sha256,
   file.ctime,
   file.size,
@@ -99,6 +101,7 @@ WHERE
         'display-manager.service,X11 Server,,1700',
         'dkms.service,Builds and install new kernel modules through DKMS,,200',
         'dm-event.socket,Device-mapper event daemon FIFOs,,200',
+        'dnf-automatic-install.timer,dnf-automatic-install timer,,200',
         'dnf-makecache.service,dnf makecache,,400',
         'dnf-makecache.timer,dnf makecache --timer,,300',
         'docker.service,Docker Application Container Engine,,1100',
@@ -266,6 +269,7 @@ WHERE
         'systemd-homed.service,Home Area Manager,,1300',
         'systemd-hostnamed.service,Hostname Service,,1100',
         'systemd-hostnamed.service,Hostname Service,,1200',
+        'systemd-hwdb-update.service,Rebuild Hardware Database,,800',
         'systemd-initctl.socket,initctl Compatibility Named Pipe,,500',
         'systemd-journal-catalog-update.service,Rebuild Journal Catalog,,700',
         'systemd-journald-audit.socket,Journal Audit Socket,,600',
@@ -333,8 +337,8 @@ WHERE
         'update-notifier-download.timer,Download data for packages that failed at package install time,,200',
         'update-notifier-motd.timer,Check to see whether there is a new version of Ubuntu available,,300',
         'upower.service,Daemon for power management,,900',
-        'usbmuxd.service,Socket daemon for the usbmux protocol used by Apple devices,,200',
         'uresourced.service,User resource assignment daemon,,300',
+        'usbmuxd.service,Socket daemon for the usbmux protocol used by Apple devices,,200',
         'user.slice,User and Session Slice,,400',
         'uuidd.socket,UUID daemon activation socket,,100',
         'veritysetup.target,Local Verity Protected Volumes,,400',
@@ -381,9 +385,10 @@ WHERE
         'zpool-trim.timer,zpool-trim.timer,,0'
       )
       OR exception_key LIKE 'machine-qemu%,Virtual Machine qemu%,,300'
+      OR exception_key LIKE 'dbus-:1.%-org.freedesktop.problems@%.service,dbus-:%.%-org.freedesktop.problems@%.service,0,200'
       OR id LIKE 'blockdev@dev-mapper-luks%.target'
       OR id LIKE 'blockdev@dev-mapper-nvme%.target'
-      OR id LIKE 'dbus-:%-org.freedesktop.problems@0.service'
+      OR id LIKE ''
       OR id LIKE 'dev-disk-by%.swap'
       OR id LIKE 'dev-mapper-%.swap'
       OR id LIKE 'dev-zram%.swap'

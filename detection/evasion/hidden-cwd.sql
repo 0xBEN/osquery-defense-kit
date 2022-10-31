@@ -1,4 +1,4 @@
--- Programs running with a hidden current working directory
+-- Programs running with a hidden current working directory (state-based)
 --
 -- false positives:
 --   * Users rummaging through their configuration files
@@ -68,12 +68,17 @@ WHERE
       'npm install,~/.npm/_cacache',
       'mysqld,~/.local/share'
     )
+    OR exception_key LIKE '%sh,~/.Trash/%'
     OR dir IN (
+      '~/.config',
+      '~/.local/bin',
       '~/.vim',
+      '~/.terraform.d',
       '~/.cache/yay',
       '~/.local/share/chezmoi',
       '~/.local/share/nvim',
-      '~/.gmailctl'
+      '~/.gmailctl',
+      '~/.zsh'
     )
     OR p.name IN (
       'bindfs',
@@ -85,20 +90,25 @@ WHERE
       'gitsign',
       'Code Helper'
     )
-    OR dir LIKE '~/.dotfiles/%'
-    OR dir LIKE '~/.gradle/%'
-    OR dir LIKE "~/%/.terraform%"
-    OR dir LIKE '~/.local/share/kotlin/%'
-    OR dir LIKE '~/go/src/%'
-    OR dir LIKE '~/.local/share/nvim/%'
-    OR dir LIKE '~/.vscode/extensions/%'
-    OR dir LIKE '~/.local/share/fish/%'
     OR dir LIKE '~/.cache/yay/%'
-    OR dir LIKE '/Library/Apple/System/Library/InstallerSandboxes/.PKInstallSandboxManager-SystemSoftware/%'
-    OR dir LIKE '~/src/%'
-    OR dir LIKE '~/%/.github%'
     OR dir LIKE '~/.cargo/%'
-    OR dir LIKE '~/.provisio%'
-    OR dir LIKE '~/.local/share/JetBrains/%'
     OR dir LIKE '~/code/%'
+    OR dir LIKE '~/.dotfiles/%'
+    OR dir LIKE '~/%/.github%'
+    OR dir LIKE '~/go/src/%'
+    OR dir LIKE '~/.gradle/%'
+    OR dir LIKE '/Library/Apple/System/Library/InstallerSandboxes/.PKInstallSandboxManager-SystemSoftware/%'
+    OR dir LIKE '~/.local/share/fish/%'
+    OR dir LIKE '~/.local/share/JetBrains/%'
+    OR dir LIKE '~/.local/share/kotlin/%'
+    OR dir LIKE '~/.local/share/nvim/%'
+    OR dir LIKE '~/.local/share/Steam/%'
+    OR dir LIKE '~/.provisio%'
+    OR dir LIKE '~/src/%'
+    OR dir LIKE '~/%/.terraform%'
+    OR dir LIKE '~/.vscode/extensions/%'
+    OR dir LIKE '~/.zsh/%'
+    OR dir LIKE '~/%/.git'
+    -- For sudo calls to other things
+    OR (dir LIKE '/home/.terraform.d/%' AND p.euid = 0)
   )
