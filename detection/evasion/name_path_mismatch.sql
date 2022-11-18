@@ -40,12 +40,13 @@ FROM
 WHERE
   short_filename != short_name
   AND NOT cmd LIKE '/nix/store/%/bin/bash%' -- Serial masqueraders
-  AND NOT short_filename IN ('bash', 'ruby', 'python', 'python3')
+  AND NOT short_filename IN ('bash', 'ruby', 'python', 'python3', 'perl')
   AND exception_key NOT IN (
     'name=blueman-applet,file=python3,500',
     'name=blueman-tray,file=python3,500',
     'name=cat,file=coreutils,500',
     'name=chrome-gnome-s,file=python3,500',
+    'name=restorecon,file=setfiles,0',
     'name=Chroot,file=firefox,500',
     'name=code-oss,file=electron,500',
     'name=exe,file=rootlessport,500',
@@ -53,9 +54,11 @@ WHERE
     'name=firefox-wrappe,file=firefox,500',
     'name=firewalld,file=python3,0',
     'name=gjs,file=gjs-console,120',
+    'name=gjs,file=gjs-console,42',
     'name=gjs,file=gjs-console,500',
     'name=sh,file=busybox,0',
     'name=cc,file=gcc,0',
+    'name=systemd-udevd,file=udevadm,500',
     'name=gnome-characte,file=gjs-console,500',
     'name=gnome-character,file=gjs-console,500',
     'name=gnome-tweak-to,file=python3,500',

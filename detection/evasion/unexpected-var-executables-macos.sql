@@ -44,10 +44,13 @@ WHERE
   AND file.path NOT LIKE '/var/db/oah/%'
   AND file.path NOT LIKE '/var/folders/%/C/com.apple.FontRegistry/annex_aux'
   AND file.path NOT LIKE '/var/folders/%/T/go.%.%.sum'
+  AND file.path NOT LIKE '/var/folders/%/T/pulumi-go.%'
   AND file.path NOT LIKE '/var/folders%/T/sp_relauncher'
   AND file.path NOT LIKE '/var/tmp/epdfinfo%'
   AND file.path NOT LIKE '/var/folders/%/T/jansi-%-libjansi.jnilib'
   AND file.path NOT LIKE '/var/tmp/IN_PROGRESS_sysdiagnose_%.tmp/mddiagnose.mdsdiagnostic/diagnostic.log'
+  AND file.path NOT LIKE '/var/run/current-system/etc/profiles/per-user/%'
+  AND file.path NOT LIKE '/var/folders/%/T/freefn-%_emacs_%.eln'
   AND (
     file.mode LIKE '%7%'
     or file.mode LIKE '%5%'
@@ -91,15 +94,14 @@ WHERE
     AND file.uid = 501
   )
   AND NOT (
-    file.path LIKE '/var/db/timezone/zoneinfo/%/%'
+    file.path LIKE '/var/db/timezone/zoneinfo/%'
     AND magic.data LIKE 'timezone%'
     AND file.size < 3000
-    AND file.mode = 0755
+    AND file.mode = '0755'
   )
   -- JetBrains (Delve)
   AND NOT (
-    file.path LIKE '/var/folders/%/T/dlvLauncher.sh'
-    AND magic.data LIKE 'Bourne-Again shell script%'
+    file.path LIKE '/var/folders/%/%/T/dlvLauncher.sh'
     AND file.size < 1024
-    AND file.mode = 0744
+    AND file.mode = '0744'
   )

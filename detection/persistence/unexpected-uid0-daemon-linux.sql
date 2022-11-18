@@ -17,8 +17,10 @@ SELECT
   f.ctime,
   f.directory AS dirname,
   p.cmdline,
+  p.cgroup_path,
   mnt_namespace,
   hash.sha256,
+  pp.path AS parent_path,
   pp.name AS parent_name,
   pp.cmdline AS parent_cmdline
 FROM
@@ -53,18 +55,26 @@ WHERE
     '/usr/bin/crond',
     '/usr/bin/dbus-daemon',
     '/usr/bin/dbus-launch',
+    '/usr/libexec/dconf-service',
+    '/usr/libexec/at-spi-bus-launcher',
+    '/usr/bin/dbus-broker-launch',
+    '/usr/bin/dnsmasq',
     '/usr/bin/dockerd',
     '/usr/bin/docker-proxy',
     '/usr/bin/fish',
+    '/usr/bin/dbus-broker',
     '/usr/bin/gdm',
-    '/usr/bin/vim',
     '/usr/bin/gpg-agent',
     '/usr/bin/journalctl',
     '/usr/bin/lightdm',
     '/usr/bin/osqueryd',
     '/usr/bin/pacman',
     '/usr/bin/sshd',
+    '/usr/sbin/sshd',
+    '/usr/sbin/atd',
     '/usr/bin/tailscaled',
+    '/usr/bin/vim',
+    '/usr/bin/virtlogd',
     '/usr/bin/wpa_supplicant',
     '/usr/libexec/accounts-daemon',
     '/usr/libexec/docker/docker-proxy',
@@ -86,8 +96,11 @@ WHERE
     '/usr/lib/systemd/systemd-homed',
     '/usr/lib/systemd/systemd-journald',
     '/usr/lib/systemd/systemd-machined',
+    '/usr/lib/systemd/systemd-fsckd',
     '/usr/lib/udisks2/udisksd',
     '/usr/lib/Xorg',
+    '/usr/local/kolide-k2/bin/launcher',
+    '/usr/local/kolide-k2/bin/osqueryd',
     '/usr/sbin/abrtd',
     '/usr/sbin/abrt-dbus',
     '/usr/sbin/acpid',
@@ -112,13 +125,18 @@ WHERE
     '/usr/bin/xargs',
     '/usr/bin/python3 -s /usr/sbin/firewalld --nofork --nopid',
     '/usr/bin/python /usr/bin/firewalld --nofork --nopid',
+    '/usr/bin/python3 /usr/libexec/blueman-mechanism',
     '/usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal',
     '/usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers'
   )
+  AND NOT p.cmdline LIKE '/usr/bin/python3 -s% /usr/sbin/firewalld%'
   AND NOT p.cmdline LIKE '/usr/bin/python3 /usr/bin/dnf %'
+  AND NOT p.cmdline LIKE '/usr/bin/python3 /usr/bin/yum %'
   AND p.path NOT LIKE '/usr/local/kolide-k2/bin/osqueryd-updates/%/osqueryd'
   AND p.path NOT LIKE '/usr/local/kolide-k2/bin/launcher-updates/%/launcher'
   AND p.path NOT LIKE '/nix/store/%/bin/%'
   AND p.path NOT LIKE '/nix/store/%-systemd-%/lib/systemd/systemd%'
   AND p.path NOT LIKE '/nix/store/%/libexec/%'
   AND p.path NOT LIKE '/snap/snapd/%/usr/lib/snapd/snapd'
+  -- Exclude processes running inside of Docker containers
+  AND NOT p.cgroup_path LIKE '/system.slice/docker-%'

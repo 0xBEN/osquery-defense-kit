@@ -27,15 +27,20 @@ SELECT
   hash.sha256,
   pp.path AS parent_path,
   pp.name AS parent_name,
+  ppp.path AS gparent_path,
+  ppp.name AS gparent_name,
   TRIM(p.cmdline) AS parent_cmd,
   pp.euid AS parent_euid,
-  phash.sha256 AS parent_sha256
+  phash.sha256 AS parent_sha256,
+  gphash.sha256 AS gparent_sha256
 FROM
   uptime,
   process_events p
   LEFT JOIN processes pp ON p.parent = pp.pid
+  LEFT JOIN processes ppp ON pp.parent = ppp.pid
   LEFT JOIN hash ON p.path = hash.path
   LEFT JOIN hash AS phash ON pp.path = phash.path
+  LEFT JOIN hash AS gphash ON ppp.path = gphash.path
 WHERE
   p.time > (strftime('%s', 'now') -45)
   AND (
@@ -71,12 +76,17 @@ WHERE
     OR cmd LIKE '%nohup%tmp%'
     OR cmd LIKE '%killall Terminal%'
     OR cmd LIKE '%iptables stop'
-    OR cmd LIKE '%pkill -f%'
+    OR (
+      p.euid = 0
+      AND (
+        cmd LIKE '%pkill -f%'
+        OR cmd LIKE '%xargs kill -9%'
+      )
+    )
     OR cmd LIKE '%rm -f /var/tmp%'
-    OR cmd LIKE '%rm -rf /boot%'
     OR cmd LIKE '%rm -f /tmp%'
-    OR cmd LIKE '%xargs kill -9%'
     OR cmd LIKE '%nohup /bin/bash%'
+    OR cmd LIKE '%history'
     OR cmd LIKE '%echo%|%base64 --decode %|%'
     OR cmd LIKE '%launchctl list%'
     OR (
@@ -89,14 +99,17 @@ WHERE
     OR cmd LIKE '%pty.spawn%'
     OR (
       cmd LIKE '%sh -i'
-      AND NOT parent_name = 'sh'
+      AND NOT parent_name IN ('sh', 'java')
     )
     OR cmd LIKE '%socat%'
     OR cmd LIKE '%SOCK_STREAM%'
     OR (
       cmd LIKE '%Socket.%'
-      AND NOT basename IN ('compile', 'sed', 'mv')
+      AND NOT basename IN ('compile', 'sed', 'mv', 'cover')
       AND NOT cmd LIKE "%sys/socket.h%"
+      AND NOT cmd LIKE "%websocket%"
+      AND NOT cmd LIKE "%socket.go%"
+      AND NOT cmd LIKE "%socket.cpython%"
     )
   ) -- Things that could reasonably happen at boot.
   AND NOT (
@@ -106,18 +119,30 @@ WHERE
   AND NOT (
     cmd LIKE '%csrutil status'
     AND parent_name IN ('Dropbox')
-  ) -- The source of these commands is still a mystery to me.
+  )
   AND NOT (
     cmd IN (
-      '/usr/bin/csrutil status',
-      '/usr/bin/csrutil report',
+      '/bin/launchctl asuser 0 /bin/launchctl list',
       '/bin/launchctl list',
+      '/bin/launchctl list com.logi.optionsplus.update',
       '/bin/launchctl list homebrew.mxcl.yabai',
-      '/bin/launchctl asuser 0 /bin/launchctl list'
+      'launchctl list com.parallels.desktop.launchdaemon',
+      'launchctl list us.zoom.ZoomDaemon',
+      '/Library/Apple/System/Library/StagedFrameworks/Safari/SafariShared.framework/XPCServices/com.apple.Safari.History.xpc/Contents/MacOS/com.apple.Safari.History',
+      'sudo launchctl list us.zoom.ZoomDaemon',
+      '/usr/bin/csrutil report',
+      '/usr/bin/csrutil status',
+      'xpcproxy com.apple.Safari.History'
     )
-    AND p.parent = -1
+    -- The source of these commands is still a mystery to me.
+    OR p.parent = -1
   )
   AND NOT cmd LIKE '/bin/rm -f /tmp/periodic.%'
   AND NOT cmd LIKE 'rm -f /tmp/locate%/_updatedb%'
   AND NOT cmd LIKE 'rm -f /tmp/locate%/mklocate%/_mklocatedb%'
+  AND NOT cmd LIKE 'rm -f /tmp/insttmp_%'
+  AND NOT cmd LIKE '/bin/cp %history%sessions/%'
   AND NOT cmd LIKE 'touch -r /tmp/KSInstallAction.%'
+  AND NOT cmd LIKE '%find /Applications/LogiTuneInstaller.app -type d -exec chmod 777 {}%'
+  AND NOT cmd LIKE '/bin/rm -f /tmp/com.adobe.%.updater/%'
+  AND NOT cmd LIKE 'dirname %history'

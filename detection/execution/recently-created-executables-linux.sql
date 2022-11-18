@@ -38,35 +38,57 @@ WHERE
   AND p.start_time >= MAX(f.ctime, f.ctime)
   AND NOT f.directory IN ('/usr/lib/firefox', '/usr/local/kolide-k2/bin') -- Typically daemons or long-running desktop apps
   -- These are binaries that are known to get updated and subsequently executed
+  --
+  -- What I would give for osquery to support binary signature verification on Linux
   AND NOT p.path IN (
     '',
     '/opt/google/chrome/chrome',
     '/opt/google/chrome/chrome_crashpad_handler',
     '/opt/google/chrome/nacl_helper',
-    '/usr/bin/containerd',
-    '/usr/bin/dockerd',
+    '/opt/Lens/chrome_crashpad_handler',
+    '/opt/Lens/lens',
+    '/opt/sublime_text/sublime_text',
+    '/usr/bin/alacritty',
     '/usr/bin/bash',
-    '/usr/bin/gedit',
-    '/usr/bin/obs',
-    '/usr/bin/docker-proxy',
-    '/usr/lib/google-cloud-sdk/platform/bundledpythonunix/bin/python3',
-    '/usr/lib/snapd/snapd',
-    '/usr/bin/pipewire',
-    '/usr/bin/tailscaled',
-    '/usr/bin/rpi-imager',
-    '/usr/bin/udevadm',
     '/usr/bin/cargo',
+    '/usr/bin/containerd',
+    '/usr/bin/containerd-shim-runc-v2',
+    '/usr/bin/docker',
+    '/usr/bin/dockerd',
+    '/usr/bin/docker-proxy',
+    '/usr/lib/flatpak-session-helper',
+    '/usr/bin/gedit',
+    '/usr/bin/gnome-keyring-daemon',
+    '/usr/bin/kbfsfuse',
+    '/usr/bin/keybase',
+    'usr/bin/keybase-redirector',
+    '/usr/bin/nm-applet',
+    '/usr/bin/obs',
+    '/usr/bin/pavucontrol',
+    '/usr/bin/pipewire',
+    '/usr/bin/rpi-imager',
+    '/usr/bin/tailscaled',
+    '/usr/bin/udevadm',
+    '/usr/bin/wpa_supplicant',
+    '/usr/lib64/firefox/firefox',
+    '/usr/lib64/google-cloud-sdk/platform/bundledpythonunix/bin/python3',
     '/usr/lib/at-spi2-registryd',
     '/usr/lib/at-spi-bus-launcher',
     '/usr/libexec/docker/docker-proxy',
     '/usr/libexec/fwupd/fwupd',
+    '/usr/libexec/snapd/snapd',
     '/usr/libexec/sssd/sssd_kcm',
     '/usr/lib/fwupd/fwupd',
     '/usr/lib/gdm',
     '/usr/lib/gdm-session-worker',
     '/usr/lib/gdm-x-session',
+    '/usr/lib/google-cloud-sdk/platform/bundledpythonunix/bin/python3',
+    '/usr/lib/libreoffice/program/oosplash',
+    '/usr/lib/libreoffice/program/soffice.bin',
+    '/usr/lib/polkit-1/polkitd',
     '/usr/lib/slack/chrome_crashpad_handler',
     '/usr/lib/slack/slack',
+    '/usr/lib/snapd/snapd',
     '/usr/lib/systemd/systemd',
     '/usr/lib/systemd/systemd-journald',
     '/usr/lib/systemd/systemd-logind',
@@ -75,12 +97,16 @@ WHERE
     '/usr/lib/systemd/systemd-timesyncd',
     '/usr/lib/x86_64-linux-gnu/obs-plugins/obs-browser-page',
     '/usr/lib/xf86-video-intel-backlight-helper',
-    '/usr/bin/containerd-shim-runc-v2',
+    '/usr/local/bin/kind',
     '/usr/sbin/chronyd',
     '/usr/sbin/cupsd',
-    '/usr/sbin/tailscaled'
+    '/usr/sbin/tailscaled',
+    '/usr/share/code/chrome_crashpad_handler',
+    '/usr/share/code/code',
+    '/usr/share/spotify-client/spotify',
+    '/usr/share/teams/team'
   )
-  AND NOT p.path LIKE '%-go-build%'
+  AND NOT p.path LIKE '/tmp/go-build%'
   AND NOT p.path LIKE '/home/%/bin/%'
   AND NOT p.path LIKE '/home/%/terraform-provider-%'
   AND NOT p.path LIKE '/home/%/%.test'
@@ -88,10 +114,12 @@ WHERE
   AND NOT p.path LIKE '/home/%/node_modules/.bin/exec-bin/%'
   AND NOT p.path LIKE '/nix/store/%/bin/%'
   AND NOT p.path LIKE '/usr/local/bin/%'
+  AND NOT p.path LIKE '/opt/%'
   AND NOT p.path LIKE '/usr/local/Cellar/%'
   AND NOT p.path LIKE '/home/%/.local/share/Steam/ubuntu12_64/%'
   AND NOT p.path LIKE '/usr/local/kolide-k2/bin/osqueryd-updates/%/osqueryd'
   AND NOT p.path LIKE '%/.vscode/extensions/%'
+  AND NOT p.path LIKE '/tmp/terraform_%/terraform'
   AND NOT pp.path IN ('/usr/bin/gnome-shell') -- Filter out developers working on their own code
   AND NOT (
     p.path LIKE '/home/%'

@@ -24,6 +24,7 @@ SELECT
   p.euid,
   p.parent,
   p.syscall,
+  pp.cgroup_path,
   hash.sha256,
   pp.path AS parent_path,
   pp.name AS parent_name,
@@ -69,6 +70,7 @@ WHERE
     OR cmd LIKE '%iptables -F%'
     OR cmd LIKE '%chattr -ia%'
     OR cmd LIKE '%chmod 777 %'
+    OR cmd LIKE '%history'
     OR cmd LIKE '%touch%acmr%'
     OR cmd LIKE '%touch -r%'
     OR cmd LIKE '%ld.so.preload%'
@@ -78,9 +80,12 @@ WHERE
     OR cmd LIKE '%systemctl stop firewalld%'
     OR cmd LIKE '%systemctl disable firewalld%'
     OR cmd LIKE '%pkill -f%'
+    OR (
+      cmd LIKE '%xargs kill -9%'
+      AND p.euid = 0
+    )
     OR cmd LIKE '%rm -f%/tmp%'
     OR cmd LIKE '%rm -rf /boot%'
-    OR cmd LIKE '%xargs kill -9%'
     OR cmd LIKE '%nohup /bin/bash%'
     OR cmd LIKE '%echo%|%base64 --decode %|%'
     OR cmd LIKE '%UserKnownHostsFile=/dev/null%'
@@ -100,10 +105,17 @@ WHERE
     OR cmd LIKE '%fsockopen%'
     OR cmd LIKE '%openssl%quiet%'
     OR cmd LIKE '%pty.spawn%'
-    OR cmd LIKE '%sh -i'
+    OR (
+      cmd LIKE '%sh -i'
+      AND NOT parent_name IN ('sh', 'java')
+    )
     OR cmd LIKE '%socat%'
     OR cmd LIKE '%SOCK_STREAM%'
-    OR (cmd LIKE '%Socket.%' AND NOT cmd LIKE '%ipc-socket%')
+    OR (
+      cmd LIKE '%Socket.%'
+      AND NOT cmd LIKE '%ipc-socket%'
+      AND NOT cmd LIKE '%/include%'
+    )
   ) -- Things that could reasonably happen at boot.
   AND NOT (
     p.path IN ('/usr/bin/kmod', '/bin/kmod')
@@ -132,8 +144,13 @@ WHERE
   AND NOT cmd LIKE 'modprobe -ab%'
   AND NOT cmd LIKE '%modprobe overlay'
   AND NOT cmd LIKE '%modprobe aufs'
+  AND NOT cmd LIKE 'modprobe --all%'
   AND NOT cmd IN ('lsmod')
   -- Seen on Ubuntu
   AND NOT cmd LIKE 'rm -f /tmp/apt-key-gpghome.%/pubring.gpg'
   AND NOT cmd LIKE 'rm -f /var/tmp/mkinitramfs_%'
   AND NOT cmd LIKE 'rm -f -- /tmp/%'
+  AND NOT cmd LIKE 'rm -f /var/lib/update-notifier/tmp%'
+  -- Invalid command from someones tmux environment
+  AND NOT cmd LIKE 'pkill -f cut -c3%'
+  AND NOT cmd LIKE 'dirname %history'

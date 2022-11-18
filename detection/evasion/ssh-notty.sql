@@ -45,3 +45,6 @@ WHERE
     grandchild_name IS NULL
     OR grandchild_name != 'zfs'
   )
+  AND child_name IS NOT NULL
+  AND child_name NOT IN ('', 'zfs')
+  AND cmd != 'sshd: docker@notty'

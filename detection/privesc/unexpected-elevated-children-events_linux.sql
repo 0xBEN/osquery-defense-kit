@@ -1,21 +1,23 @@
--- Find processes that run with a lower effective UID than their parent (state-based)
+-- Find processes that run with a lower effective UID than their parent (event-based)
 --
 -- references:
 --   * https://attack.mitre.org/techniques/T1548/001/ (Setuid and Setgid)
 --   * https://cybersecurity.att.com/blogs/labs-research/shikitega-new-stealthy-malware-targeting-linux
 --
 -- related:
---   * unexpected-privilege-escalation-events.sql
+--   * unexpected-privilege-escalation.sql
 --
--- tags: transient rapid state process escalation
--- platform: posix
+-- tags: events process escalation
+-- platform: linux
+-- interval: 30
 SELECT
   p.pid AS child_pid,
   p.path AS child_path,
-  p.name AS child_name,
+  REGEX_MATCH (RTRIM(file.path, '/'), '.*/(.*?)$', 1) AS child_name,
   p.cmdline AS child_cmdline,
+  p.time,
+  pp.start_time,
   p.euid AS child_euid,
-  p.state AS child_state,
   file.mode AS child_mode,
   hash.sha256 AS child_hash,
   p.parent AS parent_pid,
@@ -24,40 +26,48 @@ SELECT
   pp.cmdline AS parent_cmdline,
   pp.euid AS parent_euid,
   pfile.mode AS parent_mode,
-  hash.sha256 AS parent_hash
+  phash.sha256 AS parent_hash
 FROM
-  processes p
+  process_events p
   JOIN processes pp ON p.parent = pp.pid
   LEFT JOIN file ON p.path = file.path
   LEFT JOIN hash ON p.path = hash.path
   LEFT JOIN file AS pfile ON pp.path = pfile.path
   LEFT JOIN hash AS phash ON pp.path = phash.path
 WHERE
-  p.euid < pp.euid
+  p.time > (strftime('%s', 'now') -30)
+  AND p.euid < pp.euid
   AND p.path NOT IN (
+    '/bin/ps',
+    '/usr/bin/doas',
     '/usr/bin/fusermount',
     '/usr/bin/fusermount3',
     '/usr/bin/login',
     '/usr/bin/sudo',
-    '/usr/bin/doas',
-    '/bin/ps',
-    '/usr/bin/top'
+    '/usr/bin/gpgsm',
+    '/usr/bin/gpgconf',
+    '/usr/bin/gpg',
+    '/usr/bin/top',
+    '/usr/lib/snapd/snap-confine',
+    '/usr/lib/snapd/snap-update-ns',
+    '/opt/1Password/1Password-KeyringHelper',
+    '/usr/lib/systemd/systemd',
+    '/usr/lib/Xorg.wrap',
+    '/usr/lib/xorg/Xorg.wrap'
   )
   AND p.path NOT LIKE '/nix/store/%/bin/sudo'
   AND p.path NOT LIKE '/nix/store/%/bin/dhcpcd'
+  AND p.path NOT LIKE '/snap/snapd/%/usr/lib/snapd/snap-confine'
+  AND NOT pp.cmdline = '/usr/lib/systemd/systemd --user'
   AND NOT (
-    p.name = 'polkit-agent-he'
+    child_name = 'polkit-agent-helper-1'
     AND parent_path = '/usr/bin/gnome-shell'
   )
   AND NOT (
-    p.name = 'fusermount3'
+    child_name = 'fusermount3'
     AND parent_path = '/usr/lib/xdg-document-portal'
   )
   AND NOT (
-    p.path = '/usr/bin/pkexec'
+    child_name IN ('dash', 'pkexec')
     AND parent_path = '/usr/bin/update-notifier'
-  )
-  AND NOT (
-    p.path = '/usr/libexec/xdg-permission-store'
-    AND parent_path = '/usr/lib/systemd/systemd'
   )
