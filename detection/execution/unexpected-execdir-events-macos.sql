@@ -108,33 +108,55 @@ WHERE
   AND homedir NOT IN (
     '~/bin',
     '~/code/bin',
-    '~/.magefile',
+    '~/Downloads/google-cloud-sdk/bin',
     '~/go/bin',
     '~/.local/bin',
+    '~/.magefile',
+    '~/Downloads/protoc/bin',
     '~/projects/go/bin'
   )
   AND top_homedir NOT IN (
     '~/Applications/',
+    '~/Applications (Parallels)/',
     '~/bin/',
     '~/.cargo/',
+    '~/chainguard/',
     '~/code/',
+    '~/Code/',
     '~/.config/',
+    '~/git/',
+    '~/github/',
     '~/go/',
+    '~/google-cloud-sdk/',
     '~/homebrew/',
+    '~/.kuberlr/',
     '~/Library/',
+    '~/.gradle/',
     '~/.local/',
+    '~/Parallels/',
+    '~/proj/',
     '~/projects/',
+    '~/.pulumi/',
+    '~/.provisio/',
     '~/.pyenv/',
+    '~/.rustup/',
     '~/src/',
     '~/.tflint.d/',
     '~/.vscode/',
     '~/.vs-kubernetes/'
   )
+  AND top_dir NOT LIKE '~/%packages/'
   -- Locally built executables
   AND NOT (
-    signature.identifier = "a.out"
+    signature.identifier = 'a.out'
     AND homedir LIKE '~/%'
     AND pp.name IN ('fish', 'sh', 'bash', 'zsh', 'terraform', 'code')
+  )
+  AND NOT (
+    signature.authority = ''
+    AND homedir LIKE '~/%'
+    AND pp.name IN ('fish', 'sh', 'bash', 'zsh')
+    AND p.cmdline LIKE './%'
   )
   AND dir NOT LIKE '../%' -- data issue
   AND dir NOT LIKE '/Applications/%'
@@ -145,14 +167,18 @@ WHERE
   AND dir NOT LIKE '/private/tmp/PKInstallSandbox.%/Scripts/com.microsoft.OneDrive.%'
   AND dir NOT LIKE '/private/var/db/com.apple.xpc.roleaccountd.staging/%.xpc/Contents/MacOS'
   AND dir NOT LIKE '/private/var/folders/%/bin'
-  AND dir NOT LIKE '%/.terraform/providers/%'
   AND dir NOT LIKE '/private/var/folders/%/Contents/%'
   AND dir NOT LIKE '/private/var/folders/%/d/Wrapper/%.app'
   AND dir NOT LIKE '/private/var/folders/%/go-build%'
   AND dir NOT LIKE '/private/var/folders/%/GoLand'
+  AND dir NOT LIKE '%/.terraform/providers/%'
   AND dir NOT LIKE '/Volumes/com.getdropbox.dropbox-%'
+  AND homedir NOT LIKE '~/%/google-cloud-sdk/bin/%'
   AND homedir NOT LIKE '~/Library/Caches/ms-playwright/%'
-  AND homedir NOT LIKE '~/%/node_modules/.pnpm/esbuild-%/node_modules/esbuild-darwin-arm64/bin'
+  AND homedir NOT LIKE '~/%/node_modules/.pnpm/%'
+  AND homedir NOT LIKE '~/%repo%'
+  AND homedir NOT LIKE '~/%sigstore%'
+  AND homedir NOT LIKE '~/%/bin'
   AND signature.authority NOT IN (
     'Apple iPhone OS Application Signing',
     'Apple Mac OS Application Signing',

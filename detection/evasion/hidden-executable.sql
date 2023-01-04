@@ -31,4 +31,4 @@ WHERE
     OR f.filename LIKE '.%'
   )
   AND NOT f.path LIKE '/nix/store/%/%-wrapped'
-  AND NOT p.name = '.firefox-wrappe'
+  AND NOT (f.path LIKE '/nix/store/%' AND p.name LIKE '%-wrappe%')

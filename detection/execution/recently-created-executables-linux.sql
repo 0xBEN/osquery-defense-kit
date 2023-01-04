@@ -17,6 +17,7 @@ SELECT
   f.ctime,
   f.btime,
   f.mtime,
+  p.cgroup_path,
   p.start_time,
   pp.path AS parent_path,
   pp.name AS parent_name,
@@ -33,7 +34,8 @@ FROM
   LEFT JOIN hash AS ph ON pp.path = ph.path
 WHERE
   p.start_time > 0
-  AND f.ctime > 0 -- Only process programs that had an inode modification within the last 3 minutes
+  AND f.ctime > 0
+  AND p.start_time > (strftime('%s', 'now') - 7200)
   AND (p.start_time - MAX(f.ctime, f.btime)) < 180
   AND p.start_time >= MAX(f.ctime, f.ctime)
   AND NOT f.directory IN ('/usr/lib/firefox', '/usr/local/kolide-k2/bin') -- Typically daemons or long-running desktop apps
@@ -56,28 +58,37 @@ WHERE
     '/usr/bin/docker',
     '/usr/bin/dockerd',
     '/usr/bin/docker-proxy',
-    '/usr/lib/flatpak-session-helper',
     '/usr/bin/gedit',
     '/usr/bin/gnome-keyring-daemon',
     '/usr/bin/kbfsfuse',
     '/usr/bin/keybase',
     'usr/bin/keybase-redirector',
+    '/usr/bin/NetworkManager',
     '/usr/bin/nm-applet',
     '/usr/bin/obs',
     '/usr/bin/pavucontrol',
     '/usr/bin/pipewire',
+    '/usr/bin/pipewire-pulse',
     '/usr/bin/rpi-imager',
+    '/usr/bin/snap',
     '/usr/bin/tailscaled',
     '/usr/bin/udevadm',
+    '/usr/bin/wireplumber',
     '/usr/bin/wpa_supplicant',
+    '/usr/lib64/electron/electron',
     '/usr/lib64/firefox/firefox',
     '/usr/lib64/google-cloud-sdk/platform/bundledpythonunix/bin/python3',
+    '/usr/lib64/thunderbird/thunderbird',
     '/usr/lib/at-spi2-registryd',
     '/usr/lib/at-spi-bus-launcher',
+    '/usr/libexec/bluetooth/bluetoothd',
     '/usr/libexec/docker/docker-proxy',
     '/usr/libexec/fwupd/fwupd',
     '/usr/libexec/snapd/snapd',
     '/usr/libexec/sssd/sssd_kcm',
+    '/usr/libexec/tracker-extract-3',
+    '/usr/libexec/tracker-miner-fs-3',
+    '/usr/lib/flatpak-session-helper',
     '/usr/lib/fwupd/fwupd',
     '/usr/lib/gdm',
     '/usr/lib/gdm-session-worker',
@@ -95,11 +106,17 @@ WHERE
     '/usr/lib/systemd/systemd-oomd',
     '/usr/lib/systemd/systemd-resolved',
     '/usr/lib/systemd/systemd-timesyncd',
+    '/usr/lib/systemd/systemd-userdbd',
+    '/usr/lib/systemd/systemd-userwork',
     '/usr/lib/x86_64-linux-gnu/obs-plugins/obs-browser-page',
+    '/usr/lib/xdg-desktop-portal-gtk',
     '/usr/lib/xf86-video-intel-backlight-helper',
     '/usr/local/bin/kind',
+    '/usr/sbin/alsactl',
+    '/usr/sbin/avahi-daemon',
     '/usr/sbin/chronyd',
     '/usr/sbin/cupsd',
+    '/usr/sbin/rngd',
     '/usr/sbin/tailscaled',
     '/usr/share/code/chrome_crashpad_handler',
     '/usr/share/code/code',
@@ -111,8 +128,10 @@ WHERE
   AND NOT p.path LIKE '/home/%/terraform-provider-%'
   AND NOT p.path LIKE '/home/%/%.test'
   AND NOT p.path LIKE '/home/%/Projects/%'
-  AND NOT p.path LIKE '/home/%/node_modules/.bin/exec-bin/%'
+  AND NOT p.path LIKE '/home/%/.local/share/nvim/mason/packages/%'
+  AND NOT p.path LIKE '/home/%/node_modules/.bin/%'
   AND NOT p.path LIKE '/nix/store/%/bin/%'
+  AND NOT p.path LIKE '/nix/store/%/libexec/%'
   AND NOT p.path LIKE '/usr/local/bin/%'
   AND NOT p.path LIKE '/opt/%'
   AND NOT p.path LIKE '/usr/local/Cellar/%'
@@ -127,6 +146,12 @@ WHERE
     AND f.ctime = f.mtime
     AND f.uid = p.uid
     AND p.cmdline LIKE './%'
+  )
+  AND NOT (
+    p.path LIKE '/home/%/.magefile/%'
+    AND p.uid > 499
+    AND f.ctime = f.mtime
+    AND f.uid = p.uid
   )
 GROUP BY
   p.pid

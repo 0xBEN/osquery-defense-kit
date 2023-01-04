@@ -119,6 +119,7 @@ WHERE
       'Reflect Helper',
       'ruby',
       'sample',
+      'Signal Helper',
       'ssh',
       'steam_osx',
       'syncthing',
@@ -148,6 +149,7 @@ WHERE
     '443,17,500,Evernote Helper,,',
     '443,17,500,Evernote Helper,com.evernote.Evernote.helper,Apple Mac OS Application Signing',
     '443,17,500,GitKraken Boards,com.axosoft.glo,Apple iPhone OS Application Signing',
+    '443,17,500,old,dev.warp.Warp-Stable,Developer ID Application: Denver Technologies, Inc (2BBY89MBSN)',
     '443,17,500,Reflect Helper,app.reflect.ReflectDesktop,Developer ID Application: Reflect App, LLC (789ULN5MZB)',
     '443,17,500,Slack Helper,,',
     '443,6,0,com.apple.MobileSoftwareUpdate.UpdateBrainService,com.apple.MobileSoftwareUpdate.UpdateBrainService,Software Signing',
@@ -190,6 +192,7 @@ WHERE
     '443,6,500,gh,gh,',
     '443,6,500,git,com.apple.git,Software Signing',
     '443,6,500,git,git,',
+    '443,6,500,GitHub Desktop Helper,com.github.GitHubClient.helper,Developer ID Application: GitHub (VEKTX9H2N7)',
     '443,6,500,GitHub.UI,GitHub,Developer ID Application: Microsoft Corporation (UBF8T346G9)',
     '443,6,500,GitKraken Boards,com.axosoft.glo,Apple iPhone OS Application Signing',
     '443,6,500,git-remote-http,,',
@@ -219,6 +222,7 @@ WHERE
     '443,6,500,node,node,Developer ID Application: Node.js Foundation (HX7739G8FX)',
     '443,6,500,old,dev.warp.Warp-Stable,Developer ID Application: Denver Technologies, Inc (2BBY89MBSN)',
     '443,6,500,OneDriveStandaloneUpdater,com.microsoft.OneDriveStandaloneUpdater,Developer ID Application: Microsoft Corporation (UBF8T346G9)',
+    '443,6,500,PlexMobile,com.plexapp.plex,Apple iPhone OS Application Signing',
     '443,6,500,prober,a.out,',
     '443,6,500,provisio,,',
     '443,6,500,pulumi-resource-gcp,a.out,',
@@ -233,6 +237,9 @@ WHERE
     '443,6,500,release-notes,a.out,',
     '443,6,500,sample,com.apple.dt.SamplingTools.sample,Software Signing',
     '443,6,500,scorecard-darwin-amd64,,',
+    '443,6,500,Signal Helper,org.whispersystems.signal-desktop.helper,Developer ID Application: Quiet Riddle Ventures LLC (U68MSDN6DR)',
+    '443,6,500,Signal Helper (Renderer),org.whispersystems.signal-desktop.helper.Renderer,Developer ID Application: Quiet Riddle Ventures LLC (U68MSDN6DR)',
+    '443,6,500,Signal,org.whispersystems.signal-desktop,Developer ID Application: Quiet Riddle Ventures LLC (U68MSDN6DR)',
     '443,6,500,Slack Helper,,',
     '443,6,500,Slack Helper,com.tinyspeck.slackmacgap.helper,Apple Mac OS Application Signing',
     '443,6,500,Slack Helper,com.tinyspeck.slackmacgap.helper,Developer ID Application: Slack Technologies, Inc. (BQR82RBBHL)',
@@ -246,22 +253,28 @@ WHERE
     '443,6,500,trivy,a.out,',
     '443,6,500,vegeta,a.out,',
     '443,6,500,vim,vim,',
+    '443,6,500,wolfictl,a.out,',
     '443,6,500,zoom.us,us.zoom.xos,Developer ID Application: Zoom Video Communications, Inc. (BJ4HAAB9B3)',
     '443,6,500,zsh,com.apple.zsh,Software Signing',
     '53,17,500,docker-credential-gcr,a.out,',
     '53,17,500,trivy,,',
+    '443,6,500,bom,,',
+    '443,6,500,Docker Desktop Helper,com.electron.dockerdesktop.helper,Developer ID Application: Docker Inc (9BNSXJN65R)',
     '6000,6,500,ssh,,',
-    '443,17,500,old,dev.warp.Warp-Stable,Developer ID Application: Denver Technologies, Inc (2BBY89MBSN)',
     '6000,6,500,ssh,com.apple.openssh,Software Signing',
     '6000,6,500,ssh,ssh-55554944fbf65684ab9b37c2bad3a27ef78b23f4,',
     '80,6,0,com.apple.MobileSoftwareUpdate.UpdateBrainService,com.apple.MobileSoftwareUpdate.UpdateBrainService,Software Signing',
     '80,6,500,curl,com.apple.curl,Software Signing',
     '80,6,500,ksfetch,ksfetch,Developer ID Application: Google LLC (EQHXZ8M8AV)',
     '80,6,500,steam_osx,com.valvesoftware.steam,Developer ID Application: Valve Corporation (MXGJJ98X76)',
-    '80,6,500,webhook.test,a.out,'
+    '80,6,500,webhook.test,a.out,',
+    '8801,17,500,zoom.us,us.zoom.xos,Developer ID Application: Zoom Video Communications, Inc. (BJ4HAAB9B3)'
   )
+  -- Steam uses ports in the 27xxx range
+  AND NOT exception_key LIKE '27%,6,500,steam_osx,com.valvesoftware.steam,Developer ID Application: Valve Corporation (MXGJJ98X76)'
   -- There are many signing hashes for git
   AND NOT exception_key LIKE '443,6,500,git-remote-http,git-remote-http-%'
+  AND NOT exception_key LIKE '443,6,500,cargo,cargo-%'
   -- nix-shell infects children with open connections
   AND NOT (
     parent_cmd LIKE '%/tmp/nix-shell%'
@@ -335,7 +348,7 @@ WHERE
   )
   AND NOT (
     remote_port IN (53, 443)
-    AND p.name LIKE 'kubectl.%'
+    AND p.name LIKE 'kubectl%'
   )
   -- Python programs
   AND NOT (
@@ -357,6 +370,13 @@ WHERE
   AND NOT (
     remote_port IN (53, 443)
     AND p.path LIKE '/private/var/folders/%/T/GoLand/%'
+  )
+  -- theScore and other iPhone apps
+  AND NOT (
+    remote_port = 443
+    AND signature.authority = 'Apple iPhone OS Application Signing'
+    AND p.cwd = '/'
+    AND p.path = '/private/var/folders/%/Wrapper/%.app/%'
   )
 GROUP BY
   s.pid

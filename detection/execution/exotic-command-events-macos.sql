@@ -27,10 +27,11 @@ SELECT
   hash.sha256,
   pp.path AS parent_path,
   pp.name AS parent_name,
+  TRIM(pp.cmdline) AS parent_cmd,
+  TRIM(ppp.cmdline) AS gparent_cmd,
+  pp.euid AS parent_euid,
   ppp.path AS gparent_path,
   ppp.name AS gparent_name,
-  TRIM(p.cmdline) AS parent_cmd,
-  pp.euid AS parent_euid,
   phash.sha256 AS parent_sha256,
   gphash.sha256 AS gparent_sha256
 FROM
@@ -100,17 +101,11 @@ WHERE
     OR (
       cmd LIKE '%sh -i'
       AND NOT parent_name IN ('sh', 'java')
+      AND NOT parent_cmd LIKE "%pipenv shell"
     )
     OR cmd LIKE '%socat%'
     OR cmd LIKE '%SOCK_STREAM%'
-    OR (
-      cmd LIKE '%Socket.%'
-      AND NOT basename IN ('compile', 'sed', 'mv', 'cover')
-      AND NOT cmd LIKE "%sys/socket.h%"
-      AND NOT cmd LIKE "%websocket%"
-      AND NOT cmd LIKE "%socket.go%"
-      AND NOT cmd LIKE "%socket.cpython%"
-    )
+    OR INSTR(cmd, '%Socket.%') > 0
   ) -- Things that could reasonably happen at boot.
   AND NOT (
     p.path = '/usr/bin/mkfifo'
@@ -125,10 +120,16 @@ WHERE
       '/bin/launchctl asuser 0 /bin/launchctl list',
       '/bin/launchctl list',
       '/bin/launchctl list com.logi.optionsplus.update',
+      '/bin/launchctl list com.logi.optionsplus.updater',
       '/bin/launchctl list homebrew.mxcl.yabai',
+      '/bin/rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress',
+      'git history',
+      'launchctl list',
+      'launchctl list com.microsoft.OneDriveUpdaterDaemon',
       'launchctl list com.parallels.desktop.launchdaemon',
       'launchctl list us.zoom.ZoomDaemon',
       '/Library/Apple/System/Library/StagedFrameworks/Safari/SafariShared.framework/XPCServices/com.apple.Safari.History.xpc/Contents/MacOS/com.apple.Safari.History',
+      'sudo launchctl list',
       'sudo launchctl list us.zoom.ZoomDaemon',
       '/usr/bin/csrutil report',
       '/usr/bin/csrutil status',
@@ -137,6 +138,7 @@ WHERE
     -- The source of these commands is still a mystery to me.
     OR p.parent = -1
   )
+  AND NOT cmd LIKE '-history%'
   AND NOT cmd LIKE '/bin/rm -f /tmp/periodic.%'
   AND NOT cmd LIKE 'rm -f /tmp/locate%/_updatedb%'
   AND NOT cmd LIKE 'rm -f /tmp/locate%/mklocate%/_mklocatedb%'

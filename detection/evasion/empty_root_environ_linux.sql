@@ -32,15 +32,23 @@ WHERE
   AND p.parent NOT IN (0, 2)
   AND NOT p.path IS NULL
   AND p.name NOT IN (
-    'gpg-agent',
-    'dhcpcd',
+    'applydeltarpm',
     'bwrap',
-    'systemd-userwor',
-    'systemd-userdbd',
-    'nginx',
     'cupsd',
+    'dhcpcd',
+    'modprobe',
+    'dnf',
+    'systemd-udevd',
+    'gdm-session-wor',
+    'gpg-agent',
+    'nginx',
     'sshd',
+    'ssh',
     'zypak-sandbox'
+  )
+  AND NOT (
+    p.name LIKE 'systemd-%'
+    AND p.parent = 1
   )
   AND NOT pp.cmdline LIKE 'bwrap %'
   AND NOT p.cmdline LIKE '%--type=zygote%'

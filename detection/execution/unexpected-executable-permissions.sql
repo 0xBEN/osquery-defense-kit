@@ -56,10 +56,14 @@ WHERE
   )
   AND NOT (
     f.path = '/usr/bin/sudo'
-    AND f.mode = '0411'
+    AND f.mode = '4111'
     AND f.uid = 0
   )
   AND NOT (
     f.path LIKE '/home/%/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox'
     AND f.mode = '0744'
+  )
+  AND NOT (
+    f.path LIKE '/Users/%/Applications (Parallels)/%.app/Contents/MacOS/WinAppHelper'
+    AND f.mode = '0777'
   )

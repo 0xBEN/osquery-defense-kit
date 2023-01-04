@@ -36,7 +36,8 @@ FROM
   LEFT JOIN signature ON p.path = signature.path
 WHERE
   p.start_time > 0
-  AND f.ctime > 0 -- Only process programs that had an inode modification within the last 3 minutes
+  AND f.ctime > 0
+  AND p.start_time > (strftime('%s', 'now') - 7200)
   AND (p.start_time - MAX(f.ctime, f.btime)) < 180
   AND p.start_time >= MAX(f.ctime, f.ctime)
   AND signature.authority NOT IN (
@@ -48,6 +49,7 @@ WHERE
     'Developer ID Application: Bryan Jones (49EYHPJ4Q3)',
     'Developer ID Application: CodeWeavers Inc. (9C6B7X7Z8E)',
     'Developer ID Application: Corsair Memory, Inc. (Y93VXCB8Q5)',
+    'Developer ID Application: Objective-See, LLC (VBG97UB4TA)',
     'Developer ID Application: Microsoft Corporation (UBF8T346G9)',
     'Developer ID Application: Docker Inc (9BNSXJN65R)',
     'Developer ID Application: Dropbox, Inc. (G7HH3F8CAK)',
@@ -82,6 +84,7 @@ WHERE
   AND NOT p.path LIKE '/opt/homebrew/Cellar/%'
   AND NOT p.path LIKE '/private/tmp/%/Creative Cloud Installer.app/Contents/MacOS/Install'
   AND NOT p.path LIKE '/private/tmp/go-build%'
+  AND NOT p.path LIKE '/private/tmp/go-%/go/pkg/%'
   AND NOT p.path LIKE '/private/tmp/nix-build-%'
   AND NOT p.path LIKE '/private/var/db/com.apple.xpc.roleaccountd.staging/%'
   AND NOT p.path LIKE '/private/var/folders/%/bin/%'
@@ -104,12 +107,19 @@ WHERE
   AND NOT p.path LIKE '/usr/local/kolide-k2/bin/osqueryd-updates/%/osqueryd'
   AND NOT p.path LIKE '%/.vscode/extensions/%'
   AND NOT p.path LIKE '/Users/%/Library/Caches/snyk/%/snyk-macos'
+  AND NOT p.path LIKE '/Users/%/Parallels/%/Contents/MacOS/WinAppHelper'
+  AND NOT p.path LIKE '/Users/%/Applications (Parallels)/%/Contents/MacOS/WinAppHelper'
   AND NOT (
     p.path LIKE '/Users/%'
     AND p.uid > 499
     AND f.ctime = f.mtime
     AND f.uid = p.uid
     AND p.cmdline LIKE './%'
+  )
+  AND NOT (
+    p.path LIKE '/Users/%/Library/Printers/EPSON%/Contents/MacOS/PrinterProxy'
+    AND signature.identifier = 'com.apple.print.PrinterProxy'
+    AND signatur.authority = ''
   )
 GROUP BY
   p.pid

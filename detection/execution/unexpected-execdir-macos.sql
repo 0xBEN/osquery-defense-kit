@@ -107,22 +107,28 @@ WHERE
   )
   AND top_homedir NOT IN (
     '~/Applications/',
+    '~/Applications (Parallels)/',
     '~/bin/',
+    '~/.cargo/',
     '~/code/',
+    '~/Code/',
     '~/.config/',
     '~/git/',
     '~/go/',
-    '~/.kuberlr/',
     '~/google-cloud-sdk/',
     '~/homebrew/',
+    '~/.kuberlr/',
     '~/Library/',
     '~/.local/',
+    '~/Parallels/',
+    '~/proj/',
     '~/projects/',
     '~/.pulumi/',
+    '~/.pyenv/',
+    '~/.rustup/',
     '~/src/',
     '~/.tflint.d/',
     '~/.vscode/',
-    '~/.pulumi/',
     '~/.vs-kubernetes/'
   )
   -- Locally built executables
@@ -145,8 +151,9 @@ WHERE
   AND dir NOT LIKE '/private/var/folders/%/GoLand'
   AND dir NOT LIKE '%/.terraform/providers/%'
   AND dir NOT LIKE '/Volumes/com.getdropbox.dropbox-%'
+  AND homedir NOT LIKE '~/%/google-cloud-sdk/bin/%'
   AND homedir NOT LIKE '~/Library/Caches/ms-playwright/%'
-  AND homedir NOT LIKE '~/%/node_modules/.pnpm/esbuild-%/node_modules/esbuild-darwin-arm64/bin'
+  AND homedir NOT LIKE '~/%/node_modules/.pnpm/%'
   -- Allow these anywhere (put last because it's slow to query signatures)
   AND signature.authority NOT IN (
     'Apple iPhone OS Application Signing',
@@ -161,6 +168,7 @@ WHERE
     'Developer ID Application: GEORGE NACHMAN (H7V7XYVQ7D)',
     'Developer ID Application: Google LLC (EQHXZ8M8AV)',
     'Developer ID Application: Hashicorp, Inc. (D38WU7D763)',
+    'Developer ID Application: Sublime HQ Pty Ltd (Z6D26JE4Y4)',
     'Developer ID Application: Logitech Inc. (QED4VVPZWA)',
     'Developer ID Application: Microsoft Corporation (UBF8T346G9)',
     'Developer ID Application: Node.js Foundation (HX7739G8FX)',

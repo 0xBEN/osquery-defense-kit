@@ -1,4 +1,4 @@
--- Unexpected process that spawns shell processes
+-- Unexpected process that spawns shell processes (event based)
 --
 -- false positives:
 --   * IDE's
@@ -7,13 +7,15 @@
 --   * https://attack.mitre.org/techniques/T1059/ (Command and Scripting Interpreter)
 --   * https://attack.mitre.org/techniques/T1204/002/ (User Execution: Malicious File)
 --
--- tags: transient process state
+-- tags: process events
+-- interval: 60
 -- platform: posix
 SELECT
   p.name,
   p.path AS path,
   p.cmdline AS cmd,
   p.pid,
+  p.cgroup_path,
   p.parent,
   pp.name AS parent_name,
   pp.path AS parent_path,
@@ -36,6 +38,7 @@ WHERE
     'build-script-build',
     'chezmoi',
     'clang-11',
+    'code',
     'Code Helper (Renderer)',
     'Code - Insiders Helper (Renderer)',
     'collect2',
@@ -45,19 +48,24 @@ WHERE
     'demoit',
     'direnv',
     'doas',
+    'erl_child_setup',
     'find',
     'FinderSyncExtension',
     'fish',
+    'git',
     'go',
     'goland',
     'helm',
+    'i3bar',
     'i3blocks',
     'java',
+    'kitty',
     'ko',
     'kubectl',
     'lightdm',
     'make',
     'monorail',
+    'ninja',
     'nix',
     'nix-build',
     'nix-daemon',
@@ -68,6 +76,7 @@ WHERE
     'PK-Backend',
     'python',
     'roxterm',
+    'sdk',
     'sdzoomplugin',
     'sh',
     'skhd',
@@ -91,6 +100,7 @@ WHERE
   )
   AND parent_path NOT IN (
     '/Applications/Docker.app/Contents/MacOS/Docker',
+    '/Applications/Docker.app/Contents/Resources/bin/docker-credential-desktop',
     '/bin/dash',
     '/bin/sh',
     '/Library/Google/GoogleSoftwareUpdate/GoogleSoftwareUpdate.bundle/Contents/Helpers/GoogleSoftwareUpdateDaemon',
@@ -98,6 +108,7 @@ WHERE
     '/sbin/launchd',
     '/usr/lib/xorg/Xorg',
     '/usr/bin/alacritty',
+    '/Library/Developer/CommandLineTools/usr/bin/git',
     '/usr/bin/apt-get',
     '/usr/bin/bash',
     '/usr/bin/bwrap',

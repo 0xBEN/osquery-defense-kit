@@ -12,6 +12,7 @@
 -- tags: transient process
 SELECT
   p.name,
+  p.cgroup_path,
   p.path,
   p.pid,
   p.cmdline,
@@ -32,10 +33,13 @@ WHERE
   AND pid > 2
   AND p.path NOT IN (
     '/bin/bash',
+    '/bin-busybox',
     '/opt/homebrew/bin/qemu-system-aarch64',
     '/usr/bin/apt',
     '/usr/bin/aptd',
+    '/usr/bin/pacman',
     '/usr/bin/bash',
+    '/usr/lib/baloo_file_extractor',
     '/usr/bin/bwrap',
     '/usr/bin/curl',
     '/usr/bin/darktable',
@@ -51,6 +55,7 @@ WHERE
     '/usr/lib64/thunderbird/thunderbird',
     '/usr/libexec/coreduetd',
     '/usr/share/spotify-client/spotify',
+    '/Library/Application Support/Adobe/Adobe Desktop Common/HDBox/Setup',
     '/usr/libexec/flatpak-system-helper',
     '/usr/libexec/logd_helper',
     '/usr/libexec/packagekitd',
@@ -95,27 +100,36 @@ WHERE
     AND cmdline = '/usr/bin/python3 /usr/sbin/aptd'
   )
   AND NOT name IN (
+    'baloo_file_extr',
+    'bwrap',
+    'cargo',
     'chrome',
     'com.apple.MobileSoftwareUpdate.UpdateBrainService',
     'com.apple.NRD.UpdateBrainService',
     'containerd',
-    'cargo',
-    'esbuild',
     'darkfiles',
+    'esbuild',
     'firefox',
+    'dnf',
     'fsdaemon',
     'go',
     'goland',
-    'qemu-system-aarch64',
+    'golangci-lint-v',
     'gopls',
     'grype',
     'java',
-    'nessusd',
     'jetbrains-toolb',
     'launcher',
+    'nessusd',
+    'ninja',
+    'photorec',
+    'qemu-system-aarch64',
+    'syft',
     'slack',
+    'snyk',
     'steam',
     'wineserver'
+
   )
   AND p.path NOT LIKE '/Applications/%.app/Contents/%'
   AND p.path NOT LIKE '/home/%/.local/share/Steam'

@@ -50,12 +50,15 @@ WHERE
   p.path IN ('/usr/bin/osascript', '/usr/bin/osacompile')
   AND p.time > (strftime('%s', 'now') -60)
   AND exception_key NOT IN (
+    'com.vng.zalo,Developer ID Application: VNG ONLINE CO.,LTD (CVB6BX97VM),osascript -ss',
     ',,osascript',
-    ',,osascript openChrome.applescript https://localhost.ch',
-    'com.vng.zalo,Developer ID Application: VNG ONLINE CO.,LTD (CVB6BX97VM),osascript -ss'
+    ',,osascript openChrome.applescript https://localhost.ch'
   )
+  AND exception_key NOT LIKE 'install,Developer ID Application: Docker Inc (9BNSXJN65R),/usr/bin/osascript -e property exit_code: 0\x0Aproperty '
+
   AND cmd NOT IN ('osascript -e user locale of (get system info)')
   AND cmd NOT LIKE '/usr/bin/osascript /Users/%/Library/Caches/com.runningwithcrayons.Alfred/Workflow Scripts/%'
+
   -- We don't want to allow all of Python as an exception
   AND NOT (
     exception_key = 'org.python.python,,osascript'
@@ -63,7 +66,7 @@ WHERE
   )
   AND NOT (
     parent_cmd LIKE '%/google-cloud-sdk/lib/gcloud.py auth login'
-    OR parent_cmd LIKE '%/bin/gcloud auth login'
+    OR parent_cmd LIKE '%/bin/gcloud auth%login'
   )
   AND NOT (
     exception_key = ',,osascript -s se -l JavaScript'
