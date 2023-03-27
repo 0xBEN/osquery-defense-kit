@@ -29,6 +29,10 @@ WHERE
   (
     p.name LIKE '.%'
     OR f.filename LIKE '.%'
+    OR f.directory LIKE '.%'
   )
   AND NOT f.path LIKE '/nix/store/%/%-wrapped'
-  AND NOT (f.path LIKE '/nix/store/%' AND p.name LIKE '%-wrappe%')
+  AND NOT (
+    f.path LIKE '/nix/store/%'
+    AND p.name LIKE '%-wrappe%'
+  )

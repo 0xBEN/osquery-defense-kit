@@ -39,24 +39,21 @@ WHERE
   AND lp.address NOT LIKE '127.0.0.%'
   AND lp.address NOT LIKE '172.1%'
   AND lp.address NOT LIKE 'fe80::%'
-  AND lp.address NOT LIKE '::ffff:127.0.0.%'
-  -- All outgoing UDP (protocol 17) sessions are 'listening'
+  AND lp.address NOT LIKE '::ffff:127.0.0.%' -- All outgoing UDP (protocol 17) sessions are 'listening'
   AND NOT (
     lp.protocol = 17
     AND lp.port > 1024
-  )
-  -- Random webservers
+  ) -- Random webservers
   AND NOT (
     p.uid > 500
     AND lp.port IN (8000, 8080)
     AND lp.protocol = 6
-  )
-  -- Filter out unmapped raw sockets
-  AND NOT (p.pid == '')
-  -- Exceptions: the uid is capped at 500 to represent regular users versus system users
+  ) -- Filter out unmapped raw sockets
+  AND NOT (p.pid == '') -- Exceptions: the uid is capped at 500 to represent regular users versus system users
   -- port is capped at 49152 to represent transient ports
   AND NOT exception_key IN (
     '10011,6,0,launchd,Software Signing',
+    '1024,6,0,systemmigrationd,Software Signing',
     '1313,6,500,hugo,',
     '1338,6,500,registry,',
     '137,17,0,launchd,Software Signing',
@@ -65,11 +62,14 @@ WHERE
     '138,17,222,netbiosd,Software Signing',
     '16587,6,500,RescueTime,Developer ID Application: RescueTime, Inc (FSY4RB8H39)',
     '17500,6,500,Dropbox,Developer ID Application: Dropbox, Inc. (G7HH3F8CAK)',
+    '1834,6,500,Camera Hub,Developer ID Application: Corsair Memory, Inc. (Y93VXCB8Q5)',
     '2112,6,500,fake,',
     '2112,6,500,rekor-server,',
+    '2112,6,500,timestamp-server,',
     '22000,6,500,syncthing,',
     '22,6,0,launchd,Software Signing',
     '24678,6,500,node,',
+    '28197,6,500,Stream Deck,Developer ID Application: Corsair Memory, Inc. (Y93VXCB8Q5)',
     '2968,6,500,EEventManager,Developer ID Application: Seiko Epson Corporation (TXAEAV5RN4)',
     '33060,6,74,mysqld,Developer ID Application: Oracle America, Inc. (VB5E2TV963)',
     '3306,6,500,mariadbd,',
@@ -84,14 +84,16 @@ WHERE
     '49152,6,0,launchd,Software Signing',
     '49152,6,0,remoted,Software Signing',
     '49152,6,0,remotepairingdeviced,Software Signing',
-    '49152,6,500,com.docker.supervisor,Developer ID Application: Docker Inc (9BNSXJN65R)',
     '49152,6,500,com.docker.backend,Developer ID Application: Docker Inc (9BNSXJN65R)',
+    '49152,6,500,com.docker.supervisor,Developer ID Application: Docker Inc (9BNSXJN65R)',
+    '49152,6,500,EcammLiveRemoteXPCServer,Developer ID Application: Ecamm Network, LLC (5EJH68M642)',
     '49152,6,500,GarageBand,Apple Mac OS Application Signing',
     '49152,6,500,IPNExtension,Apple Mac OS Application Signing',
     '49152,6,500,java,Developer ID Application: Eclipse Foundation, Inc. (JCDTMS22B4)',
     '49152,6,500,java,Developer ID Application: Oracle America, Inc. (VB5E2TV963)',
     '49152,6,500,jetbrains-toolbox,Developer ID Application: JetBrains s.r.o. (2ZEFAR8TH3)',
     '49152,6,500,LogiMgrDaemon,Developer ID Application: Logitech Inc. (QED4VVPZWA)',
+    '49152,6,500,logioptionsplus_agent,Developer ID Application: Logitech Inc. (QED4VVPZWA)',
     '49152,6,500,Music,Software Signing',
     '49152,6,500,node,',
     '49152,6,500,rapportd,Software Signing',
@@ -102,17 +104,21 @@ WHERE
     '49152,6,500,vpnkit-bridge,Developer ID Application: Docker Inc (9BNSXJN65R)',
     '49152,6,500,WorkflowAppControl,Developer ID Application: Brother Industries, LTD. (5HCL85FLGW)',
     '5000,6,500,ControlCenter,Software Signing',
+    '5001,6,500,gvproxy,',
     '5060,6,500,CommCenter,Software Signing',
+    '53,17,500,dnsmasq,',
+    '53,17,65,mDNSResponder,Software Signing',
+    '53,6,500,dnsmasq,',
+    '53,6,65,mDNSResponder,Software Signing',
     '546,17,0,configd,Software Signing',
+    '547,17,500,dhcp6d,Software Signing',
     '5900,6,0,launchd,Software Signing',
     '5900,6,0,screensharingd,Software Signing',
+    '5990,6,500,goland,Developer ID Application: JetBrains s.r.o. (2ZEFAR8TH3)',
     '6000,6,500,X11.bin,Developer ID Application: Apple Inc. - XQuartz (NA574AWV7E)',
     '631,6,0,cupsd,Software Signing',
-    '67,17,0,launchd,Software Signing',
     '67,17,0,bootpd,Software Signing',
-    '53,6,65,mDNSResponder,Software Signing',
-    '547,17,500,dhcp6d,Software Signing',
-    '2112,6,500,timestamp-server,',
+    '67,17,0,launchd,Software Signing',
     '68,17,0,configd,Software Signing',
     '7000,6,500,ControlCenter,Software Signing',
     '80,6,500,com.docker.backend,Developer ID Application: Docker Inc (9BNSXJN65R)',
@@ -138,12 +144,25 @@ WHERE
     AND lp.port > 5000
   )
   AND NOT (
+    exception_key LIKE '%,6,500,IPNExtension,Apple Mac OS Application Signing'
+    AND lp.port > 5000
+  )
+  AND NOT (
     p.path LIKE ',ko-app,%'
     AND lp.port > 1024
     and lp.protocol = 6
   )
   AND NOT (
-    p.name IN ('hugo', 'node', 'com.docker.backend', 'kubectl')
+    p.name IN (
+      'caddy',
+      'com.docker.backend',
+      'controller',
+      'docker-proxy',
+      'hugo',
+      'kubectl',
+      'node',
+      'webhook'
+    )
     AND lp.port > 1024
     and lp.protocol = 6
   )
@@ -160,6 +179,13 @@ WHERE
     AND p.cmdline LIKE './%'
     AND lp.port > 1024
     AND lp.protocol = 6
+  )
+  AND NOT (
+    (
+      p.path = '/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/ARDAgent'
+      AND lp.port = 3283
+      AND lp.protocol = 6
+    )
   )
 GROUP BY
   exception_key

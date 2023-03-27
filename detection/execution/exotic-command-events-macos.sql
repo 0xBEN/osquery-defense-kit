@@ -8,44 +8,77 @@
 --
 -- tags: transient process events
 -- platform: darwin
--- interval: 45
-SELECT
-  p.pid,
-  p.path,
-  REPLACE(
-    p.path,
-    RTRIM(p.path, REPLACE(p.path, '/', '')),
-    ''
-  ) AS basename,
-  -- On macOS there is often a trailing space
-  TRIM(p.cmdline) AS cmd,
-  p.mode,
-  p.cwd,
-  p.euid,
-  p.parent,
-  p.syscall,
-  hash.sha256,
-  pp.path AS parent_path,
-  pp.name AS parent_name,
-  TRIM(pp.cmdline) AS parent_cmd,
-  TRIM(ppp.cmdline) AS gparent_cmd,
-  pp.euid AS parent_euid,
-  ppp.path AS gparent_path,
-  ppp.name AS gparent_name,
-  phash.sha256 AS parent_sha256,
-  gphash.sha256 AS gparent_sha256
+-- interval: 180
+SELECT -- Child
+  pe.path AS p0_path,
+  REGEX_MATCH (pe.path, '.*/(.*)', 1) AS p0_name,
+  TRIM(pe.cmdline) AS p0_cmd,
+  pe.cwd AS p0_cwd,
+  pe.pid AS p0_pid,
+  pe.euid AS p0_euid,
+  s.authority AS p0_authority,
+  -- Parent
+  pe.parent AS p1_pid,
+  TRIM(COALESCE(p1.cmdline, pe1.cmdline)) AS p1_cmd,
+  COALESCE(p1.path, pe1.path) AS p1_path,
+  COALESCE(p_hash1.sha256, pe_hash1.sha256) AS p1_hash,
+  REGEX_MATCH (COALESCE(p1.path, pe1.path), '.*/(.*)', 1) AS p1_name,
+  pe_sig1.authority AS p1_authority,
+  -- Grandparent
+  COALESCE(p1.parent, pe1.parent) AS p2_pid,
+  TRIM(
+    COALESCE(p1_p2.cmdline, pe1_p2.cmdline, pe1_pe2.cmdline)
+  ) AS p2_cmd,
+  COALESCE(p1_p2.path, pe1_p2.path, pe1_pe2.path) AS p2_path,
+  COALESCE(
+    p1_p2_hash.path,
+    pe1_p2_hash.path,
+    pe1_pe2_hash.path
+  ) AS p2_hash,
+  REGEX_MATCH (
+    COALESCE(p1_p2.path, pe1_p2.path, pe1_pe2.path),
+    '.*/(.*)',
+    1
+  ) AS p2_name,
+  COALESCE(
+    p1_p2_sig.authority,
+    pe1_p2_sig.authority,
+    pe1_pe2_sig.authority
+  ) AS p2_authority,
+  -- Exception key
+  REGEX_MATCH (pe.path, '.*/(.*)', 1) || ',' || MIN(pe.euid, 500) || ',' || REGEX_MATCH (COALESCE(p1.path, pe1.path), '.*/(.*)', 1) || ',' || REGEX_MATCH (
+    COALESCE(p1_p2.path, pe1_p2.path, pe1_pe2.path),
+    '.*/(.*)',
+    1
+  ) AS exception_key
 FROM
-  uptime,
-  process_events p
-  LEFT JOIN processes pp ON p.parent = pp.pid
-  LEFT JOIN processes ppp ON pp.parent = ppp.pid
-  LEFT JOIN hash ON p.path = hash.path
-  LEFT JOIN hash AS phash ON pp.path = phash.path
-  LEFT JOIN hash AS gphash ON ppp.path = gphash.path
+  process_events pe,
+  uptime
+  LEFT JOIN processes p ON pe.pid = p.pid
+  LEFT JOIN signature s ON pe.path = s.path -- Parents (via two paths)
+  LEFT JOIN processes p1 ON pe.parent = p1.pid
+  LEFT JOIN hash p_hash1 ON p1.path = p_hash1.path
+  LEFT JOIN process_events pe1 ON pe.parent = pe1.pid
+  AND pe1.cmdline != ''
+  LEFT JOIN hash pe_hash1 ON pe1.path = pe_hash1.path
+  LEFT JOIN signature pe_sig1 ON pe1.path = pe_sig1.path -- Grandparents (via 3 paths)
+  LEFT JOIN processes p1_p2 ON p1.parent = p1_p2.pid -- Current grandparent via parent processes
+  LEFT JOIN processes pe1_p2 ON pe1.parent = pe1_p2.pid -- Current grandparent via parent events
+  LEFT JOIN process_events pe1_pe2 ON pe1.parent = pe1_p2.pid
+  AND pe1_pe2.cmdline != '' -- Past grandparent via parent events
+  LEFT JOIN hash p1_p2_hash ON p1_p2.path = p1_p2_hash.path
+  LEFT JOIN hash pe1_p2_hash ON pe1_p2.path = pe1_p2_hash.path
+  LEFT JOIN hash pe1_pe2_hash ON pe1_pe2.path = pe1_pe2_hash.path
+  LEFT JOIN signature p1_p2_sig ON p1_p2.path = p1_p2_sig.path
+  LEFT JOIN signature pe1_p2_sig ON pe1_p2.path = pe1_p2_sig.path
+  LEFT JOIN signature pe1_pe2_sig ON pe1_pe2.path = pe1_pe2_sig.path
 WHERE
-  p.time > (strftime('%s', 'now') -45)
+  pe.time > (strftime('%s', 'now') -180)
+  AND pe.status = 0
+  AND pe.cmdline != ''
+  AND pe.cmdline IS NOT NULL
   AND (
-    basename IN (
+    p0_name IN (
       'bitspin',
       'bpftool',
       'csrutil',
@@ -64,87 +97,102 @@ WHERE
       'nc',
       'socat'
     ) -- Chrome Stealer
-    OR cmd LIKE '%set visible of front window to false%'
-    OR cmd LIKE '%chrome%-load-extension%' -- Known attack scripts
-    OR basename LIKE '%pwn%'
-    OR basename LIKE '%attack%' -- Unusual behaviors
-    OR cmd LIKE '%chattr -ia%'
-    OR cmd LIKE '%chmod 777 %'
-    OR cmd LIKE '%touch%acmr%'
-    OR cmd LIKE '%touch -r%'
-    OR cmd LIKE '%ld.so.preload%'
-    OR cmd LIKE '%urllib.urlopen%'
-    OR cmd LIKE '%nohup%tmp%'
-    OR cmd LIKE '%killall Terminal%'
-    OR cmd LIKE '%iptables stop'
+    OR p0_cmd LIKE '%set visible of front window to false%'
+    OR p0_cmd LIKE '%chrome%-load-extension%' -- Known attack scripts
+    OR p0_name LIKE '%pwn%'
+    OR p0_name LIKE '%attack%' -- Unusual behaviors
+    OR p0_cmd LIKE '%powershell%'
+    OR p0_cmd LIKE '%chattr -i%'
+    OR p0_cmd LIKE '%dd if=/dev/%'
+    OR p0_cmd LIKE '%cat /dev/null >%'
+    OR p0_cmd LIKE '%truncate -s0 %'
+    OR p0_cmd LIKE '%touch%acmr%'
+    OR p0_cmd LIKE '%touch -r%'
+    OR p0_cmd LIKE '%ld.so.preload%'
+    OR p0_cmd LIKE '%urllib.urlopen%'
+    OR p0_cmd LIKE '%nohup%tmp%'
+    OR p0_cmd LIKE '%killall Terminal%'
     OR (
-      p.euid = 0
+      pe.euid = 0
       AND (
-        cmd LIKE '%pkill -f%'
-        OR cmd LIKE '%xargs kill -9%'
+        p0_cmd LIKE '%pkill -f%'
+        OR p0_cmd LIKE '%xargs kill -9%'
       )
     )
-    OR cmd LIKE '%rm -f /var/tmp%'
-    OR cmd LIKE '%rm -f /tmp%'
-    OR cmd LIKE '%nohup /bin/bash%'
-    OR cmd LIKE '%history'
-    OR cmd LIKE '%echo%|%base64 --decode %|%'
-    OR cmd LIKE '%launchctl list%'
+    OR p0_cmd LIKE '%rm -f /var/tmp%'
+    OR p0_cmd LIKE '%rm -f /tmp%'
+    OR p0_cmd LIKE '%nohup /bin/bash%'
     OR (
-      cmd LIKE '%UserKnownHostsFile=/dev/null%'
-      AND NOT parent_name = 'limactl'
-    ) -- Random keywords
-    OR cmd LIKE '%ransom%' -- Reverse shells
-    OR cmd LIKE '%fsockopen%'
-    OR cmd LIKE '%openssl%quiet%'
-    OR cmd LIKE '%pty.spawn%'
-    OR (
-      cmd LIKE '%sh -i'
-      AND NOT parent_name IN ('sh', 'java')
-      AND NOT parent_cmd LIKE "%pipenv shell"
+      INSTR(p0_cmd, 'history') > 0
+      AND p0_cmd LIKE '%history'
+      AND p0_cmd NOT LIKE '% history'
     )
-    OR cmd LIKE '%socat%'
-    OR cmd LIKE '%SOCK_STREAM%'
-    OR INSTR(cmd, '%Socket.%') > 0
+    OR p0_cmd LIKE '%echo%|%base64 --decode %|%'
+    OR p0_cmd LIKE '%launchctl bootout%'
+    OR p0_cmd LIKE '%chflags uchg%'
+    OR (
+      p0_cmd LIKE '%UserKnownHostsFile=/dev/null%'
+      AND NOT p1_name = 'limactl'
+    ) -- Random keywords
+    OR p0_cmd LIKE '%ransom%' -- Reverse shells
+    OR p0_cmd LIKE '%fsockopen%'
+    OR p0_cmd LIKE '%openssl%quiet%'
+    OR p0_cmd LIKE '%pty.spawn%'
+    OR (
+      p0_cmd LIKE '%sh -i'
+      AND NOT p1_name IN ('sh', 'java')
+      AND NOT p1_cmd LIKE "%pipenv shell"
+    )
+    OR p0_cmd LIKE '%socat%'
+    OR p0_cmd LIKE '%SOCK_STREAM%'
+    OR INSTR(p0_cmd, 'Socket.') > 0
   ) -- Things that could reasonably happen at boot.
   AND NOT (
-    p.path = '/usr/bin/mkfifo'
-    AND cmd LIKE '%/org.gpgtools.log.%/fifo'
+    pe.path = '/usr/bin/mkfifo'
+    AND (
+      p0_cmd LIKE '%/org.gpgtools.log.%/fifo'
+      OR p0_cmd LIKE '%/var/%/gitstatus.POWERLEVEL9K.%'
+      OR p0_cmd LIKE '%/var/%/p10k.worker.%'
+    )
   )
   AND NOT (
-    cmd LIKE '%csrutil status'
-    AND parent_name IN ('Dropbox')
+    p0_cmd LIKE '%csrutil status'
+    AND p1_name IN ('Dropbox')
   )
   AND NOT (
-    cmd IN (
-      '/bin/launchctl asuser 0 /bin/launchctl list',
-      '/bin/launchctl list',
-      '/bin/launchctl list com.logi.optionsplus.update',
-      '/bin/launchctl list com.logi.optionsplus.updater',
-      '/bin/launchctl list homebrew.mxcl.yabai',
+    p0_cmd IN (
+      '/bin/launchctl bootout gui/501 /Library/LaunchAgents/com.logi.optionsplus.plist',
+      '/bin/launchctl bootout system/com.docker.socket',
       '/bin/rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress',
       'git history',
-      'launchctl list',
-      'launchctl list com.microsoft.OneDriveUpdaterDaemon',
-      'launchctl list com.parallels.desktop.launchdaemon',
-      'launchctl list us.zoom.ZoomDaemon',
+      'helm history',
       '/Library/Apple/System/Library/StagedFrameworks/Safari/SafariShared.framework/XPCServices/com.apple.Safari.History.xpc/Contents/MacOS/com.apple.Safari.History',
-      'sudo launchctl list',
-      'sudo launchctl list us.zoom.ZoomDaemon',
+      'nc -h',
+      'nc -uv 8.8.8.8 53',
+      'nix profile history',
+      'rm -f /tmp/mysql.sock',
+      'sh -c launchctl bootout system "/Library/LaunchDaemons/com.ecamm.EcammAudioXPCHelper.plist"',
       '/usr/bin/csrutil report',
       '/usr/bin/csrutil status',
+      '/usr/bin/pkill -F /private/var/run/lima/shared_socket_vmnet.pid',
+      '/usr/bin/sudo /bin/rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress',
+      '/usr/bin/xattr -d com.apple.writer_bundle_identifier /Applications/Safari.app',
       'xpcproxy com.apple.Safari.History'
-    )
-    -- The source of these commands is still a mystery to me.
-    OR p.parent = -1
+    ) -- The source of these commands is still a mystery to me.
+    OR pe.parent = -1
   )
-  AND NOT cmd LIKE '-history%'
-  AND NOT cmd LIKE '/bin/rm -f /tmp/periodic.%'
-  AND NOT cmd LIKE 'rm -f /tmp/locate%/_updatedb%'
-  AND NOT cmd LIKE 'rm -f /tmp/locate%/mklocate%/_mklocatedb%'
-  AND NOT cmd LIKE 'rm -f /tmp/insttmp_%'
-  AND NOT cmd LIKE '/bin/cp %history%sessions/%'
-  AND NOT cmd LIKE 'touch -r /tmp/KSInstallAction.%'
-  AND NOT cmd LIKE '%find /Applications/LogiTuneInstaller.app -type d -exec chmod 777 {}%'
-  AND NOT cmd LIKE '/bin/rm -f /tmp/com.adobe.%.updater/%'
-  AND NOT cmd LIKE 'dirname %history'
+  AND NOT p0_cmd LIKE 'launchctl bootout gui/501 /Users/%/Library/LaunchAgents/com.elgato.StreamDeck.plist'
+  AND NOT p0_cmd LIKE '-history%'
+  AND NOT p0_cmd LIKE 'dirname %history'
+  AND NOT p0_cmd LIKE '/bin/rm -f /tmp/periodic.%'
+  AND NOT p0_cmd LIKE '/bin/rm -f /tmp/nix-shell.%'
+  AND NOT p0_cmd LIKE 'touch -r . /private/tmp/nix-build%'
+  AND NOT p0_cmd LIKE '%GNU Libtool%touch -r%'
+  AND NOT p0_cmd LIKE 'rm -f /tmp/locate%/_updatedb%'
+  AND NOT p0_cmd LIKE 'rm -f /tmp/locate%/mklocate%/_mklocatedb%'
+  AND NOT p0_cmd LIKE 'rm -f /tmp/insttmp_%'
+  AND NOT p0_cmd LIKE '/bin/cp %history%sessions/%'
+  AND NOT p0_cmd LIKE 'touch -r /tmp/KSInstallAction.%'
+  AND NOT p0_cmd LIKE '%find /Applications/LogiTuneInstaller.app -type d -exec chmod 777 {}%'
+  AND NOT p0_cmd LIKE '/bin/rm -f /tmp/com.adobe.%.updater/%'
+  AND NOT p0_name IN ('cc1', 'compile')

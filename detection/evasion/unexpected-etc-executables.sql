@@ -29,6 +29,7 @@ WHERE
   )
   AND file.directory NOT IN (
     '/etc/acpi',
+    '/etc/acpi/actions',
     '/etc/alternatives',
     '/etc/apcupsd',
     '/etc/apm/resume.d',
@@ -118,10 +119,18 @@ WHERE
     '/etc/rdnssd',
     '/etc/redhat-lsb',
     '/etc/resolvconf/update.d',
+    '/etc/needrestart/notify.d',
+    '/etc/needrestart/hook.d',
+    '/etc/needrestart/restart.d',
+    '/etc/sysconfig/network-scripts',
     '/etc/security',
     '/etc/skel',
+    '/etc/network',
+    '/etc/pki/tls/misc',
+    '/etc/smartmontools',
     '/etc/ssl/certs',
     '/etc/ssl/misc',
+    '/etc/vpl/vars.sh',
     '/etc/ssl/trust-source',
     '/etc/systemd/system',
     '/etc/systemd/system/graphical.target.wants',
@@ -141,14 +150,25 @@ WHERE
   )
   AND file.path NOT IN (
     '/etc/nftables.conf',
+    '/etc/sv/ssh/run',
+    '/etc/sv/ssh/finish',
+    '/etc/libpaper.d/texlive-base',
     '/etc/rmt',
     '/etc/grub2.cfg',
+    '/etc/pki/tls/certs/renew-dummy-cert',
+    '/etc/pki/tls/certs/make-dummy-cert',
+    '/etc/shutdown.sh',
+    '/etc/pwrstatd.conf',
+    '/etc/hibernate.sh',
     '/etc/grub2-efi.cfg',
     '/etc/paths.d/100-rvictl',
     '/etc/profile',
+    '/etc/sudoers.d/lima',
     '/etc/qemu-ifdown',
     '/etc/qemu-ifup',
     '/etc/opt/chrome/native-messaging-hosts/com.google.endpoint_verification.api_helper.json'
   )
   -- Nix (on macOS) -- actually a symbolic link
   AND file.path NOT LIKE '/etc/profiles/per-user/%/bin/%'
+  AND file.path NOT LIKE '/etc/pwrstatd-%.sh'
+  AND file.path NOT LIKE '/etc/pwrstatd-%.sh'

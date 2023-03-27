@@ -5,13 +5,14 @@
 --
 -- WARNING: This query is known to require a higher than average wall time.
 --
--- interval: 20
+-- interval: 30
 -- platform: darwin
 SELECT
   key,
   value,
   p.pid,
   p.path,
+  p.cwd,
   p.cmdline,
   p.parent AS parent_pid,
   pp.cmdline AS parent_cmd
@@ -36,6 +37,8 @@ WHERE -- This time should match the interval
   )
   OR (
     key = 'DYLD_INSERT_LIBRARIES' -- actively exploited on programs which disable library security
+    AND NOT pe.value = '/System/Library/PrivateFrameworks/PreviewsInjection.framework/PreviewsInjection'
+    AND NOT pe.value LIKE '/opt/homebrew/Cellar/r/4.%/lib/R/lib/libR.dylib'
   )
   OR (
     key = 'DYLD_FRAMEWORK_PATH' -- sort of obsolete, but may affect SIP abusers

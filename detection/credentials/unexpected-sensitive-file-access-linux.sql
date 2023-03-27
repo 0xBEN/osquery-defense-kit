@@ -7,7 +7,7 @@
 -- references:
 --   * https://attack.mitre.org/techniques/T1555/ (Credentials from Password Stores)
 --
--- tags: transient often state file access
+-- tags: transient state file access
 SELECT
   pof.pid,
   pof.fd,
@@ -21,7 +21,6 @@ SELECT
   pp.name AS parent_name,
   pp.cwd AS parent_cwd,
   pp.path AS parent_path,
-  hp.sha256 AS parent_sha256,
   pf.filename AS program_base,
   hash.sha256,
   REPLACE(f.directory, u.directory, '~') AS dir,
@@ -45,8 +44,9 @@ SELECT
     )
   ) AS exception_key
 FROM
-  process_open_files pof
-  LEFT JOIN processes p ON pof.pid = p.pid
+  -- Starting with processes is just slightly faster than starting with pof
+  processes p
+  LEFT JOIN process_open_files pof ON p.pid = pof.pid
   LEFT JOIN processes pp ON p.parent = pp.pid
   LEFT JOIN file f ON pof.path = f.path
   LEFT JOIN file pf ON p.path = pf.path
@@ -54,8 +54,11 @@ FROM
   LEFT JOIN hash ON p.path = hash.path
   LEFT JOIN hash hp ON pp.path = hp.path
 WHERE
-  f.uid != ''
+  -- minor optimization: filtering out low parents saves us another 5% of runtime
+  p.parent > 2
+  -- Large files are probably not secrets
   AND pf.filename != ''
+  AND f.size < 1000000
   AND (
     pof.path IN ('/var/run/docker.sock')
     OR pof.path LIKE '/home/%/.ssh/%'
@@ -76,14 +79,16 @@ WHERE
       'aws,aws,~/.aws',
       'chrome,chrome,~/.config/google-chrome',
       'chrome_crashpad_handler,chrome_crashpad,',
+      'firefox,Privileged Mozi,~/.mozilla/firefox',
       'chrome_crashpad_handler,chrome_crashpad,~/.config/google-chrome',
       'firefox,file:// Content,~/.cache/mozilla',
       'firefox,file:// Content,~/.mozilla/firefox',
+      'firefox,file:// Content,~/snap/firefox',
       'firefox,firefox,~/.cache/mozilla',
       'firefox,firefox,~/.mozilla/firefox',
-      'vim,vim,~/.aws',
       'firefox,firefox,~/snap/firefox',
       'firefox,.firefox-wrappe,~/.cache/mozilla',
+      'firefox,Sandbox Forked,~/snap/firefox',
       'firefox,.firefox-wrappe,~/.mozilla/firefox',
       'firefox,Isolated Servic,~/.cache/mozilla',
       'firefox,Isolated Servic,~/.mozilla/firefox',
@@ -108,7 +113,8 @@ WHERE
       'python3,python3,~/.config/gcloud',
       'slack,slack,~/.config/Slack',
       'slack,slack,~/snap/slack',
-      'soffice.bin,soffice.bin,~/.mozilla/firefox'
+      'soffice.bin,soffice.bin,~/.mozilla/firefox',
+      'vim,vim,~/.aws'
     )
   )
 GROUP BY

@@ -35,14 +35,14 @@ WHERE
     OR file.path LIKE '/dev/shm/%/.%/%%'
   )
   AND file.type = 'regular'
+  AND file.size > 64
   AND file.path NOT LIKE '%/../%'
   AND file.path NOT LIKE '%/./%'
   AND (
     file.mode LIKE '%7%'
     or file.mode LIKE '%5%'
     or file.mode LIKE '%1%'
-  )
-  -- Seen on Ubuntu
+  ) -- Seen on Ubuntu
   AND NOT (
     file.uid = 1000
     AND file.gid = 1000
@@ -50,21 +50,39 @@ WHERE
     AND magic.data = 'data'
     AND file.path LIKE '/dev/shm/pulse-shm-%'
     AND file.size > 60000000
-  )
-  -- Seen with Steam
+  ) -- Seen with Steam
   AND NOT (
     file.uid = 1000
-    AND file.gid = 100
-    AND file.mode = '0755'
-    AND magic.data = 'data'
+    AND file.gid IN (100, 1000)
+    AND file.mode IN ('0755', '0775')
     AND file.path LIKE '/dev/shm/u1000-Shm_%'
-    AND file.size > 1000000
+    AND (
+      magic.data NOT LIKE "%executable%"
+      OR magic.data IN (
+        'data',
+        'Applesoft BASIC program data, first line number 86',
+        'mc68k executable (shared)',
+        'DOS executable (COM)'
+      )
+    )
   )
   AND NOT (
     file.uid = 1000
-    AND file.gid = 100
+    AND file.gid IN (100, 1000)
+    AND file.mode IN ('0755', '0775')
+    AND magic.data IS NULL
+    AND file.path LIKE '/dev/shm/u1000-Shm_%'
+  )
+  AND NOT (
+    file.uid = 1000
+    AND file.gid IN (100, 1000)
+    AND file.mode IN ('0755', '0775')
+    AND file.path = '/dev/shm/u1000-ValveIPCSharedObj-Steam'
+    AND file.size > 2000000
+  )
+  AND NOT (
+    file.uid = 1000
     AND file.mode = '0755'
     AND file.path LIKE '/dev/shm/flatpak-com.valvesoftware.Steam-%/u1000-Shm_%'
     AND file.size > 1000000
   )
-

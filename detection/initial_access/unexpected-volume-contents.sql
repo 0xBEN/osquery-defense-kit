@@ -44,9 +44,9 @@ WHERE
     extension IN (
       'command',
       'lnk',
+      'gcode',
       'mpkg',
-      -- Enable later once we know this query works well
-      --             'pkg',
+      'pkg',
       'scpt',
       'dmg',
       'iso',
@@ -69,33 +69,55 @@ WHERE
     OR basename LIKE 'cg%'
   ) -- exceptions go here
   AND basename NOT IN (
-    '..',
     '.',
-    '.background',
-    '.disk_label_2x',
-    '.disk_label',
-    '.DS_Store',
-    '.iotest',
-    '.file-revisions-by-id',
-    '.file',
-    '.metadata_never_index_unless_rootfs',
-    '.shortcut-targets-by-id',
-    '.TemporaryItems',
-    '.Trashes',
-    '._Id.txt',
-    '._AUTORUN.INF',
-    '.vol',
-    '.apdisk',
-    '._.Trashes',
-    '._.TemporaryItems',
+    '..',
     '._.apdisk',
+    '.apdisk',
+    '._AUTORUN.INF',
+    '.background',
+    '.background.png',
+    '.disk_label',
+    '.keystone_install',
+    '.CFUserTextEncoding',
+    '.actrc',
+    '.angular-config.json',
+    '.mysql_history',
+    '.lesshst',
+    '.gitconfig',
+    '.flyrc',
+    '.dbshell',
+    '.bash_history',
+    '.bashrc',
+    '.disk_label_2x',
+    '.DS_Store',
+    '.file',
+    'LogiPresentation Installer.app',
+    '.file-revisions-by-id',
+    '._Id.txt',
+    '.iotest',
+    '.metadata_never_index_unless_rootfs',
+    'Seagate Dashboard Installer.exe',
+    '.shortcut-targets-by-id',
+    '._.TemporaryItems',
+    '.TemporaryItems',
+    '._.Trashes',
+    '.zsh_history',
+    '.Trashes',
+    '.vol',
     '.VolumeIcon.icns'
   )
   AND authority NOT IN (
-    'Developer ID Application: Google LLC (EQHXZ8M8AV)'
+    'Developer ID Application: Google LLC (EQHXZ8M8AV)',
+    'Developer ID Application: Canon Inc. (XE2XNRRXZ5)',
+    'Developer ID Application: Logitech Inc. (QED4VVPZWA)',
+    'Developer ID Application: Adobe Inc. (JQ525L2MZD)'
   ) -- Unsigned programs here
   AND trimpath NOT IN (
     '/Volumes/Google Chrome/.keystone_install',
     '/Volumes/Google Chrome Canary/.keystone_install',
+    '/Volumes/Garmin Express/Install Garmin Express.pkg',
+    '/Volumes/PMHOME_3601DL/PMH_INST.pkg',
     '/Volumes/Jabra Direct Setup/JabraDirectSetup.pkg'
   )
+  AND trimpath NOT LIKE '/Volumes/JDK %/JDK %.pkg'
+  AND trimpath NOT LIKE '/Volumes/mysql-shell-%/mysql-shell-%.pkg'

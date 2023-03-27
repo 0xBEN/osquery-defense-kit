@@ -14,6 +14,8 @@ SELECT
   datetime(file.btime, 'unixepoch') AS file_created,
   magic.data,
   hash.sha256,
+  s.authority,
+  s.identifier,
   LOWER(
     REGEX_MATCH (RTRIM(file.path, '/'), '.*\.(.*?)$', 1)
   ) AS extension
@@ -22,16 +24,20 @@ FROM
   LEFT JOIN file ON mdfind.path = file.path
   LEFT JOIN magic ON file.path = magic.path
   LEFT JOIN hash ON file.path = hash.path
+  LEFT JOIN signature s ON file.path = s.path
 WHERE
   mdfind.query = 'kMDItemWhereFroms == ''*https://mail.google.com/*'''
   AND file.btime > (strftime('%s', 'now') -86400)
   -- Extensions that would not normally raise suspicion if sent by e-mail (excludes dmg, iso, lnk, exe)
   AND extension NOT IN (
+    'ai',
     'cer',
     'csv',
     'doc',
     'docx',
+    'dwg',
     'eml',
+    'eps',
     'gif',
     'htm',
     'html',
@@ -39,6 +45,7 @@ WHERE
     'jfif',
     'jpeg',
     'jpg',
+    'key',
     'mov',
     'mp3',
     'mp4',
@@ -46,13 +53,16 @@ WHERE
     'mpg',
     'ods',
     'odt',
+    'pages',
     'pdf',
     'pem',
     'pgp',
     'png',
+    'potx',
     'ppt',
     'pptx',
     'pub',
+    'svg',
     'tif',
     'tiff',
     'txt',
@@ -60,5 +70,6 @@ WHERE
     'xls',
     'xlsm',
     'xlsx',
+    'xml',
     'zip'
   )

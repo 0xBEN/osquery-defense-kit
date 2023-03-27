@@ -15,7 +15,7 @@ SELECT
   p.parent,
   f.directory,
   f.ctime,
-  f.btime,
+  f.size,
   f.mtime,
   p.cgroup_path,
   p.start_time,
@@ -36,7 +36,7 @@ WHERE
   p.start_time > 0
   AND f.ctime > 0
   AND p.start_time > (strftime('%s', 'now') - 7200)
-  AND (p.start_time - MAX(f.ctime, f.btime)) < 180
+  AND (p.start_time - MAX(f.ctime, f.btime)) < 45
   AND p.start_time >= MAX(f.ctime, f.ctime)
   AND NOT f.directory IN ('/usr/lib/firefox', '/usr/local/kolide-k2/bin') -- Typically daemons or long-running desktop apps
   -- These are binaries that are known to get updated and subsequently executed
@@ -45,33 +45,52 @@ WHERE
   AND NOT p.path IN (
     '',
     '/opt/google/chrome/chrome',
+    '/usr/bin/packer',
     '/opt/google/chrome/chrome_crashpad_handler',
     '/opt/google/chrome/nacl_helper',
+    '/usr/bin/gnome-software',
     '/opt/Lens/chrome_crashpad_handler',
     '/opt/Lens/lens',
+    '/usr/lib/ibus/ibus-dconf',
+    '/usr/bin/limactl',
+    '/usr/lib/ibus/ibus-portal',
+    '/usr/lib/ibus/ibus-engine-simple',
+    '/usr/bin/faked',
+    '/usr/bin/appstreamcli',
     '/opt/sublime_text/sublime_text',
+    '/usr/lib/systemd/systemd-machined',
+    '/usr/lib/upowerd',
+    '/usr/bin/nvidia-persistenced',
     '/usr/bin/alacritty',
+    '/usr/bin/dash',
     '/usr/bin/bash',
+    '/usr/bin/rpmbuild',
+    '/usr/bin/make',
     '/usr/bin/cargo',
     '/usr/bin/containerd',
     '/usr/bin/containerd-shim-runc-v2',
     '/usr/bin/docker',
     '/usr/bin/dockerd',
     '/usr/bin/docker-proxy',
+    '/usr/bin/fusermount3',
     '/usr/bin/gedit',
+    '/usr/bin/gjs-console',
     '/usr/bin/gnome-keyring-daemon',
+    '/usr/bin/ibus-daemon',
     '/usr/bin/kbfsfuse',
     '/usr/bin/keybase',
-    'usr/bin/keybase-redirector',
+    '/usr/bin/keybase-redirector',
     '/usr/bin/NetworkManager',
     '/usr/bin/nm-applet',
     '/usr/bin/obs',
     '/usr/bin/pavucontrol',
     '/usr/bin/pipewire',
     '/usr/bin/pipewire-pulse',
+    '/usr/bin/python3.11',
     '/usr/bin/rpi-imager',
     '/usr/bin/snap',
     '/usr/bin/tailscaled',
+    '/usr/bin/sshfs',
     '/usr/bin/udevadm',
     '/usr/bin/wireplumber',
     '/usr/bin/wpa_supplicant',
@@ -84,6 +103,14 @@ WHERE
     '/usr/libexec/bluetooth/bluetoothd',
     '/usr/libexec/docker/docker-proxy',
     '/usr/libexec/fwupd/fwupd',
+    '/usr/libexec/ibus-dconf',
+    '/usr/libexec/ibus-engine-simple',
+    '/usr/libexec/ibus-extension-gtk3',
+    '/usr/libexec/ibus-portal',
+    '/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1',
+    '/usr/lib/systemd/systemd-hostnamed',
+    '/usr/libexec/ibus-x11',
+    '/usr/bin/hugo',
     '/usr/libexec/snapd/snapd',
     '/usr/libexec/sssd/sssd_kcm',
     '/usr/libexec/tracker-extract-3',
@@ -91,7 +118,10 @@ WHERE
     '/usr/lib/flatpak-session-helper',
     '/usr/lib/fwupd/fwupd',
     '/usr/lib/gdm',
+    '/usr/bin/gnome-shell',
+    '/usr/lib/gnome-shell-calendar-server',
     '/usr/lib/gdm-session-worker',
+    '/usr/bin/sudo',
     '/usr/lib/gdm-x-session',
     '/usr/lib/google-cloud-sdk/platform/bundledpythonunix/bin/python3',
     '/usr/lib/libreoffice/program/oosplash',
@@ -101,21 +131,35 @@ WHERE
     '/usr/lib/slack/slack',
     '/usr/lib/snapd/snapd',
     '/usr/lib/systemd/systemd',
+    '/bin/containerd-shim-runc-v2',
+    '/bin/containerd',
     '/usr/lib/systemd/systemd-journald',
     '/usr/lib/systemd/systemd-logind',
+    '/usr/lib/systemd/systemd-homed',
     '/usr/lib/systemd/systemd-oomd',
     '/usr/lib/systemd/systemd-resolved',
     '/usr/lib/systemd/systemd-timesyncd',
     '/usr/lib/systemd/systemd-userdbd',
     '/usr/lib/systemd/systemd-userwork',
+    '/usr/sbin/sshd',
+    '/usr/lib/tracker-extract-3',
+    '/usr/bin/gitsign-credential-cache',
+    '/usr/libexec/gnome-shell-calendar-server',
     '/usr/lib/x86_64-linux-gnu/obs-plugins/obs-browser-page',
     '/usr/lib/xdg-desktop-portal-gtk',
+    '/usr/libexec/accounts-daemon',
+    '/usr/bin/gnome-calendar',
+    '/usr/bin/ssh-agent',
     '/usr/lib/xf86-video-intel-backlight-helper',
     '/usr/local/bin/kind',
+    '/usr/libexec/flatpak-system-helper',
+    '/usr/bin/golangci-lint',
     '/usr/sbin/alsactl',
     '/usr/sbin/avahi-daemon',
     '/usr/sbin/chronyd',
     '/usr/sbin/cupsd',
+    '/usr/sbin/ModemManager',
+    '/usr/sbin/NetworkManager',
     '/usr/sbin/rngd',
     '/usr/sbin/tailscaled',
     '/usr/share/code/chrome_crashpad_handler',
@@ -123,25 +167,38 @@ WHERE
     '/usr/share/spotify-client/spotify',
     '/usr/share/teams/team'
   )
-  AND NOT p.path LIKE '/tmp/go-build%'
   AND NOT p.path LIKE '/home/%/bin/%'
+  AND NOT p.path LIKE '/home/%/.local/share/JetBrains/Toolbox/apps/%'
+  AND NOT p.path LIKE '/home/%/.local/share/nvim/mason/packages/%'
+  AND NOT p.path LIKE '/home/%/.local/share/Steam/ubuntu12_64/%'
+  AND NOT p.path LIKE '/home/%/node_modules/.bin/%'
+  AND NOT p.path LIKE '/home/%/Projects/%'
   AND NOT p.path LIKE '/home/%/terraform-provider-%'
   AND NOT p.path LIKE '/home/%/%.test'
-  AND NOT p.path LIKE '/home/%/Projects/%'
-  AND NOT p.path LIKE '/home/%/.local/share/nvim/mason/packages/%'
-  AND NOT p.path LIKE '/home/%/node_modules/.bin/%'
   AND NOT p.path LIKE '/nix/store/%/bin/%'
   AND NOT p.path LIKE '/nix/store/%/libexec/%'
-  AND NOT p.path LIKE '/usr/local/bin/%'
   AND NOT p.path LIKE '/opt/%'
+  AND NOT p.path LIKE '/tmp/go-build%'
+  AND NOT p.path LIKE '/tmp/terraform_%/terraform'
+  AND NOT p.path LIKE '/tmp/tmp.%/%/bin/%'
+  AND NOT p.path LIKE '/usr/local/bin/%'
   AND NOT p.path LIKE '/usr/local/Cellar/%'
-  AND NOT p.path LIKE '/home/%/.local/share/Steam/ubuntu12_64/%'
   AND NOT p.path LIKE '/usr/local/kolide-k2/bin/osqueryd-updates/%/osqueryd'
   AND NOT p.path LIKE '%/.vscode/extensions/%'
-  AND NOT p.path LIKE '/tmp/terraform_%/terraform'
+  AND NOT (
+    p.name IN ('osqtool-x86_64', 'osqtool-arm64')
+    AND p.cmdline LIKE './%'
+  )
   AND NOT pp.path IN ('/usr/bin/gnome-shell') -- Filter out developers working on their own code
   AND NOT (
     p.path LIKE '/home/%'
+    AND p.uid > 499
+    AND f.ctime = f.mtime
+    AND f.uid = p.uid
+    AND p.cmdline LIKE './%'
+  )
+  AND NOT (
+    p.path LIKE '/tmp/%/osqtool-%'
     AND p.uid > 499
     AND f.ctime = f.mtime
     AND f.uid = p.uid

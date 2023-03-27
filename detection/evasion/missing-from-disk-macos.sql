@@ -51,12 +51,17 @@ WHERE
       OR cmd LIKE '/Library/Application Support/Logitech.localized/%'
       OR cmd LIKE '/Library/Developer/CommandLineTools/%'
       OR p.path IN (
-        '/Applications/Slack.app/Contents/Frameworks/Slack Helper.app/Contents/MacOS/Slack Helper'
+        '/Applications/Slack.app/Contents/Frameworks/Slack Helper.app/Contents/MacOS/Slack Helper',
+        '/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app/Contents/MacOS/Code Helper (Renderer)'
       )
       OR cmd LIKE '/opt/homebrew/Cellar/%'
+      OR p.path LIKE '/Users/%/Library/Application Support/Steam/Steam.AppBundle/Steam/Contents/MacOS/ipcserver.old'
       OR p.path LIKE '/opt/homebrew/Cellar/%/bin/%'
+      OR p.path LIKE '/Users/%/homebrew/Cellar/%'
       OR p.path LIKE '/private/var/folders/zz/%/T/PKInstallSandboxTrash/%.sandboxTrash/%'
       OR p.path LIKE '/Users/%/node_modules/.pnpm/%'
+      OR p.path LIKE '/Users/%/homebrew/Cellar/%/bin/%'
+      OR p.path LIKE '/Users/%/.local/share/nvim/mason/packages/%'
       OR cmd LIKE '/opt/homebrew/opt/%'
       OR cmd LIKE '/private/var/folders/%/Visual Studio Code.app/Contents/%'
       OR cmd LIKE '/Users/%/homebrew/opt/mysql/bin/%' -- Sometimes cmd is empty also :(

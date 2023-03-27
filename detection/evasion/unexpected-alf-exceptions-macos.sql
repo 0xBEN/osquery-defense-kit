@@ -31,10 +31,24 @@ FROM
   LEFT JOIN file ON ae.path = file.path
   LEFT JOIN hash ON ae.path = hash.path
   LEFT JOIN signature ON ae.path = signature.path
-WHERE -- NOTE:We intentionally want to preserve missing files
-  -- Unfortunately, there is no column for when an exception was granted, so
-  -- we're currently unable to filter out old entries.
-  exception_key NOT IN (
+WHERE
+  -- Filter out stock exceptions to decrease overhead
+  ae.path NOT IN (
+    '/System/Library/CoreServices/UniversalControl.app/',
+    '/System/Library/PrivateFrameworks/Admin.framework/Versions/A/Resources/readconfig',
+    '/System/Library/PrivateFrameworks/EmbeddedOSInstall.framework/Versions/A/XPCServices/EmbeddedOSInstallService.xpc/',
+    '/usr/bin/nmblookup',
+    '/usr/libexec/bootpd',
+    '/usr/libexec/configd',
+    '/usr/libexec/discoveryd',
+    '/usr/libexec/xartstorageremoted',
+    '/usr/sbin/mDNSResponder',
+    '/usr/sbin/racoon'
+  )
+  -- Ignore files that ahve already been removed
+  AND file.filename NOT NULL
+  AND exception_key NOT IN (
+    ',a.out,/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/bin/kubectl,501',
     'Apple Mac OS Application Signing,com.apple.garageband10,/Applications/GarageBand.app/,0',
     'Apple Mac OS Application Signing,com.utmapp.QEMULauncher,/Applications/UTM.app/Contents/XPCServices/QEMUHelper.xpc/Contents/MacOS/QEMULauncher.app/,0',
     'Apple Mac OS Application Signing,io.tailscale.ipn.macos.network-extension,/Applications/Tailscale.app/Contents/PlugIns/IPNExtension.appex/,0',
@@ -42,6 +56,7 @@ WHERE -- NOTE:We intentionally want to preserve missing files
     ',,/Applications/IntelliJ%20IDEA.app/,',
     ',,/Applications/ProtonMail%20Bridge.app/,',
     ',,/Applications/Visual%20Studio%20Code.app/,',
+    'Developer ID Application: Voicemod Sociedad Limitada. (S2MC4XQDSM),net.voicemod.desktop,/Applications/Voicemod.app/,0',
     ',,/Applications/Visual%20Studio%20Code.app/Contents/Frameworks/Code%20Helper.app/,',
     'Developer ID Application: Bohemian Coding (WUGMZZ5K46),com.bohemiancoding.sketch3,/Applications/Sketch.app/,501',
     'Developer ID Application: Bohemian Coding (WUGMZZ5K46),com.bohemiancoding.SketchMirrorHelper,/Applications/Sketch.app/Contents/XPCServices/SketchMirrorHelper.xpc/,501',
@@ -53,26 +68,28 @@ WHERE -- NOTE:We intentionally want to preserve missing files
     'Developer ID Application: RescueTime, Inc (FSY4RB8H39),com.rescuetime.RescueTime,/Applications/RescueTime.app/,0',
     'Developer ID Application: Sonos, Inc. (2G4LW83Q3E),com.sonos.macController,/Applications/Sonos.app/,501',
     'Developer ID Application: Spotify (2FNC3A47ZF),com.spotify.client,/Applications/Spotify.app/,501',
+    'Developer ID Application: Tailscale Inc. (W5364U7YZB),io.tailscale.ipn.macsys.network-extension,/Library/SystemExtensions/A30AF854-E980-4345-A658-17000BF66D00/io.tailscale.ipn.macsys.network-extension.systemextension/,0',
     'Developer ID Application: VNG ONLINE CO.,LTD (CVB6BX97VM),com.vng.zalo,/Applications/Zalo.app/,501',
-    ',iodined-55554944d1ffcb236a84363d9b667be6a1742a17,/usr/local/sbin/iodined,501', -- thanks Jed!
+    ',dnsmasq,/opt/homebrew/Cellar/dnsmasq/2.88/sbin/dnsmasq,0',
+    ',iodined-55554944d1ffcb236a84363d9b667be6a1742a17,/usr/local/sbin/iodined,501',
     ',java,/opt/homebrew/Cellar/openjdk/19/libexec/openjdk.jdk/Contents/Home/bin/java,501',
-    'Software Signing,com.apple.bootpd,/usr/libexec/bootpd,0',
-    'Software Signing,com.apple.configd,/usr/libexec/configd,0',
+    ',org.python.python,/opt/homebrew/Cellar/python@3.10/3.10.9/Frameworks/Python.framework/Versions/3.10/Resources/Python.app/,501',
+    ',org.python.python,/opt/homebrew/Cellar/python@3.11/3.11.2_1/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/,501',
+    'Software Signing,com.apple.audio.InfoHelper,/System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.InfoHelper.xpc/,0',
     'Software Signing,com.apple.controlcenter,/System/Library/CoreServices/ControlCenter.app/,0',
-    'Software Signing,com.apple.EmbeddedOSInstallService,/System/Library/PrivateFrameworks/EmbeddedOSInstall.framework/Versions/A/XPCServices/EmbeddedOSInstallService.xpc/,0',
-    'Software Signing,com.apple.mDNSResponder,/usr/sbin/mDNSResponder,0',
     'Software Signing,com.apple.Music,/System/Applications/Music.app/,0',
     'Software Signing,com.apple.nc,/usr/bin/nc,0',
-    'Software Signing,com.apple.racoon,/usr/sbin/racoon,0',
-    'Software Signing,com.apple.universalcontrol,/System/Library/CoreServices/UniversalControl.app/,0',
     'Software Signing,com.apple.WebKit.Networking,/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/,0',
     'Software Signing,com.apple.WebKit.Networking,/System/Volumes/Preboot/Cryptexes/OS/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/,0',
     'Software Signing,com.apple.xartstorageremoted,/usr/libexec/xartstorageremoted,0',
-    ',,/System/Library/PrivateFrameworks/Admin.framework/Versions/A/Resources/readconfig,',
     '/System/Volumes/Preboot/Cryptexes/OS/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/',
-    ',,/usr/bin/nmblookup,',
-    ',,/usr/libexec/discoveryd,'
+    ',,/usr/local/sbin/iodined,501'
   )
+  AND NOT exception_key LIKE ',a.out,/opt/homebrew/Cellar/podman/%/libexec/podman/gvproxy,501'
+  AND NOT exception_key LIKE ',a.out,/private/var/folders/%/T/GoLand/%,501'
+  AND NOT exception_key LIKE ',a.out,/Users/%/GolandProjects/documentation-code-examples/debuggingTutorial/myApp,501'
+  AND NOT exception_key LIKE ',node,/opt/homebrew/Cellar/nvm/%/versions/node/v%/bin/node,501'
+  AND NOT exception_key LIKE ',java,/opt/homebrew/Cellar/openjdk/%/libexec/openjdk.jdk/Contents/Home/bin/java,501'
   AND NOT (
     signature.identifier LIKE 'cargo-%'
     AND ae.path LIKE '/Users/%/.rustup/%'
@@ -95,6 +112,11 @@ WHERE -- NOTE:We intentionally want to preserve missing files
   )
   AND NOT (
     ae.path LIKE '/Users/%/Library/Application%20Support/Steam/Steam.AppBundle/Steam/'
+  )
+  AND NOT (
+    signature.authority = ''
+    AND signature.identifier = 'org.chromium.Chromium'
+    AND ae.path LIKE '/Users/%/Library/pnpm/global/%/.pnpm/carlo@%/node_modules/carlo/lib/.local-data/mac-%/chrome-mac/Chromium.app/'
   )
   AND NOT (
     (

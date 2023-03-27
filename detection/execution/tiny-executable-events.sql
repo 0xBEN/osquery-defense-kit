@@ -3,7 +3,7 @@
 -- references:
 --   * https://cybersecurity.att.com/blogs/labs-research/shikitega-new-stealthy-malware-targeting-linux
 --
--- interval: 30
+-- interval: 300
 -- tags: transient process events
 SELECT
   p.pid,
@@ -31,10 +31,12 @@ FROM
   LEFT JOIN hash phash ON pp.path = phash.path
   LEFT JOIN magic ON p.path = magic.path
 WHERE
-  p.time > (strftime('%s', 'now') -30)
+  p.time > (strftime('%s', 'now') -300)
   AND file.size > 0
   AND file.size < 10000
   AND file.type = 'regular'
+  AND p.cwd != ""
+  AND p.cwd IS NOT NULL
   AND p.path NOT LIKE '%.sh'
   AND p.path NOT LIKE '%.py'
   AND p.path NOT LIKE '%.rb'
@@ -44,6 +46,8 @@ WHERE
     AND magic.data LIKE 'POSIX shell script%'
   )
   AND p.path NOT LIKE '/private/var/folders/%/T/iTerm2-scrip%sh'
+  AND p.path NOT LIKE '/home/%/.local/share/Steam/ubuntu12_32/reaper'
+  AND p.path NOT LIKE '/home/%/.local/share/Steam/steamapps/common/SteamLinuxRuntime_soldier/pressure-vessel/libexec/steam-runtime-tools-0/i386-linux-gnu-inspect-library'
   -- Removes a false-positive we've seen on Linux, generated through 'runc init'
   AND NOT (
     p.path = "/"

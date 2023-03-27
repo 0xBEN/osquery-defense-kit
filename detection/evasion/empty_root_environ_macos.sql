@@ -15,6 +15,7 @@ SELECT
   p.on_disk,
   p.parent,
   p.cmdline,
+  p.cwd,
   pp.name AS parent_name,
   pp.cmdline AS parent_cmd,
   signature.identifier,
@@ -36,12 +37,18 @@ FROM
   LEFT JOIN hash ON p.path = hash.path
   LEFT JOIN signature ON p.path = signature.path
 WHERE
-  p.euid = 0
-  AND
-  -- This time should match the interval
-  p.start_time > (strftime('%s', 'now') - 601) -- Filter out transient processes that may not have an envs entry by the time we poll for it
-  AND p.start_time < (strftime('%s', 'now') - 1)
-  AND p.path NOT LIKE '/System/Library/%'
+  p.pid IN (
+    SELECT
+      pid
+    FROM
+      processes
+    WHERE
+      euid = 0
+      AND start_time > (strftime('%s', 'now') - 601)
+      AND start_time < (strftime('%s', 'now') - 1)
+      AND path NOT LIKE '/System/Library/%'
+      AND path NOT LIKE '/opt/homebrew/Cellar/%'
+  )
   AND signature.authority NOT IN (
     'Software Signing',
     'Apple Mac OS Application Signing',
@@ -62,7 +69,6 @@ WHERE
     'Developer ID Application: Parallels International GmbH (4C6364ACXT)',
     'Developer ID Application: Yubico Limited (LQA3CS5MM7)'
   )
-  AND NOT p.path LIKE '/opt/homebrew/Cellar/%'
 GROUP BY
   p.pid
 HAVING

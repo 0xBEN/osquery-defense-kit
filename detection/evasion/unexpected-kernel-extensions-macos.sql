@@ -6,7 +6,8 @@
 -- platform: darwin
 -- tags: persistent seldom kernel
 SELECT
-  *
+  linked_against, name, path, size, version,
+  path || ',' || name || ',' || version || ',' || linked_against AS exception_key
 FROM
   kernel_extensions
 WHERE
@@ -14,4 +15,8 @@ WHERE
   AND NOT (
     idx = 0
     AND name = '__kernel__'
-  );
+  )
+  AND exception_key NOT IN ('/Library/StagedExtensions/Library/Extensions/CalDigitUSBHubSupport.kext,com.CalDigit.USBHubSupport,1,<3>')
+  AND exception_key NOT LIKE '/Library/StagedExtensions/Library/Extensions/ufsd_NTFS.kext,com.paragon-software.filesystems.ntfs,%'
+  AND exception_key NOT LIKE '/Library/StagedExtensions/Library/Filesystems/macfuse.fs/Contents/Extensions/12/macfuse.kext,io.macfuse.filesystems.macfuse,%'
+  AND exception_key NOT LIKE '/Library/StagedExtensions/Library/Extensions/ufsd_ExtFS.kext,com.paragon-software.filesystems.extfs,%'

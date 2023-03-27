@@ -54,6 +54,7 @@ WHERE
     'Developer ID Application: Brave Software, Inc. (KL8N8XSYF4)',
     'Developer ID Application: Brother Industries, LTD. (5HCL85FLGW)',
     'Developer ID Application: Bryan Jones (49EYHPJ4Q3)',
+    'Developer ID Application: Reflect App, LLC (789ULN5MZB)',
     'Developer ID Application: CodeWeavers Inc. (9C6B7X7Z8E)',
     'Developer ID Application: Corsair Memory, Inc. (Y93VXCB8Q5)',
     'Developer ID Application: Sublime HQ Pty Ltd (Z6D26JE4Y4)',
@@ -85,6 +86,7 @@ WHERE
         '/Applications/Canon Utilities/Inkjet Extended Survey Program/Inkjet Extended Survey Program.app/Contents/MacOS/ESPController.app/Contents/Library/LoginItems/CanonIJExtendedSurveyLaunchAgent.app/Contents/MacOS/CanonIJExtendedSurveyLaunchAgent'
       )
       OR p.path LIKE '/Users/%/Library/Application Support/com.elgato.StreamDeck/Plugins/%'
+      OR p.path LIKE '/private/var/folders/%/T/AppTranslocation/%/Contents/MacOS/%'
       OR p.path LIKE '/Applications/%.app/Contents/MacOS/%'
       OR p.path LIKE '/Applications/%.app/Contents/Frameworks/%/Versions/A/Resources/%'
       OR p.path LIKE '/opt/homebrew/Cellar/%/bin/%'

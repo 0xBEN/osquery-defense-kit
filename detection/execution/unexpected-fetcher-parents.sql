@@ -5,10 +5,11 @@
 --
 -- tags: transient process state often
 -- platform: posix
-SELECT p.pid,
+SELECT
+  p.pid,
   p.path,
   p.name AS child_name,
-  p.cmdline,
+  p.cmdline AS cmd,
   p.cwd,
   p.euid,
   p.parent,
@@ -21,7 +22,7 @@ SELECT p.pid,
   gp.cmdline AS gparent_cmd,
   pp.pid AS gparent_pid,
   hash.sha256 AS parent_sha256,
-  CONCAT(
+  CONCAT (
     p.name,
     ',',
     MIN(p.euid, 500),
@@ -30,30 +31,67 @@ SELECT p.pid,
     ',',
     gp.name
   ) AS exception_key
-FROM processes p
+FROM
+  processes p
   LEFT JOIN processes pp ON p.parent = pp.pid
   LEFT JOIN processes gp ON pp.parent = gp.pid
   LEFT JOIN hash ON pp.path = hash.path
-WHERE child_name IN ('curl', 'wget', 'ftp', 'tftp') -- And not a regular local user
+WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-parent-events
+  child_name IN ('curl', 'wget', 'ftp', 'tftp') -- And not a regular local user
+  AND NOT exception_key IN (
+    'curl,0,09-timezone,nm-dispatcher',
+    'curl,0,build.sh,buildkit-runc',
+    'curl,0,nm-dispatcher,',
+    'curl,0,nm-dispatcher,nm-dispatcher',
+    'curl,300,bash,nix',
+    'curl,301,bash,nix',
+    'curl,302,bash,nix',
+    'curl,303,bash,nix',
+    'curl,305,bash,nix',
+    'curl,307,bash,nix',
+    'curl,500,bash,bash',
+    'curl,500,bash,fakeroot',
+    'curl,500,bash,fish',
+    'curl,500,bash,nix-daemon',
+    'curl,500,bash,ShellLauncher',
+    'curl,500,bash,zsh',
+    'curl,500,env,env',
+    'curl,500,eos-connection-,eos-update-noti',
+    'curl,500,fish,gnome-terminal-',
+    'curl,500,launchd,kernel_task',
+    'curl,500,makepkg,yay',
+    'curl,500,ruby,zsh',
+    'curl,500,ShellLauncher,',
+    'curl,500,ShellLauncher,login',
+    'curl,500,Slack,launchd',
+    'curl,500,Stats,bash',
+    'curl,500,zsh,login',
+    'curl,500,zsh,sh',
+    'wget,500,env,env',
+    'wget,500,sh,bwrap',
+    'wget,500,zsh,bash'
+  )
   AND NOT (
     p.euid > 500
     AND parent_name IN ('sh', 'fish', 'zsh', 'bash', 'dash')
     AND gparent_name IN (
       'alacritty',
       'gnome-terminal-',
+      'kitty',
+      'login',
       'roxterm',
       'tmux',
       'tmux:server',
       'wezterm-gui',
-      'kitty',
       'zsh'
     )
   )
-  AND NOT parent_name IN ('yay')
-  AND NOT exception_key IN (
-    'curl,500,fish,gnome-terminal-',
-    'curl,500,bash,zsh'
+  AND NOT p.cmdline IN (
+    'curl -s -6 https://api.serhiy.io/v1/stats/ip',
+    'curl -s -4 https://api.serhiy.io/v1/stats/ip'
   )
+  AND NOT parent_name IN ('yay')
+  AND NOT p.cmdline LIKE 'curl -s https://support-sp.apple.com/sp/product%'
   AND NOT (
     p.euid > 500
     AND parent_name = 'env'
@@ -64,4 +102,25 @@ WHERE child_name IN ('curl', 'wget', 'ftp', 'tftp') -- And not a regular local u
     AND parent_name = 'ruby'
     AND parent_cmd LIKE '%/opt/homebrew/Library/Homebrew/brew.rb%'
   )
-GROUP BY p.pid
+  AND NOT (
+    p.euid > 500
+    AND parent_name = 'env'
+    AND parent_cmd LIKE '/usr/bin/env bash ./hack/%.sh'
+  )
+  AND NOT (
+    p.euid > 500
+    AND parent_name = 'bash'
+    AND parent_cmd LIKE 'bash ./hack/%.sh'
+  )
+  AND NOT (
+    p.euid > 500
+    AND parent_name = 'bash'
+    AND parent_cmd LIKE 'bash %/bin/go-build %'
+  )
+  AND NOT (
+    p.euid > 500
+    AND parent_name = 'ruby'
+    AND p.cmdline LIKE '/usr/bin/curl --disable --cookie /dev/null --globoff --show-error --user-agent Homebrew/%'
+  )
+GROUP BY
+  p.pid

@@ -15,112 +15,139 @@ SELECT
   file.size,
   datetime(file.btime, 'unixepoch') AS file_created,
   magic.data,
+  hash.sha256,
+  signature.identifier,
+  signature.authority,
   ea.value AS url,
   REGEX_MATCH (ea.value, '/[\w_-]+\.([\w\._-]+)[:/]', 1) AS domain,
   REGEX_MATCH (ea.value, '/([\w_-]+\.[\w\._-]+)[:/]', 1) AS host
 FROM
   mdfind
   LEFT JOIN file ON mdfind.path = file.path
+  LEFT JOIN hash ON mdfind.path = hash.path
   LEFT JOIN extended_attributes ea ON mdfind.path = ea.path
-  LEFT JOIN magic ON file.path = magic.path
+  LEFT JOIN magic ON mdfind.path = magic.path
+  LEFT JOIN signature ON mdfind.path = signature.path
 WHERE
   (
     mdfind.query = "kMDItemWhereFroms != '' && kMDItemFSName == '*.iso'"
     OR mdfind.query = "kMDItemWhereFroms != '' && kMDItemFSName == '*.dmg'"
+    OR mdfind.query = "kMDItemWhereFroms != '' && kMDItemFSName == '*.pkg'"
   )
   AND ea.key = 'where_from'
   AND file.btime > (strftime('%s', 'now') -86400)
   AND domain NOT IN (
     'adobe.com',
+    'akmedia.digidesign.com',
     'alfredapp.com',
     'android.com',
     'apple.com',
-    'download.prss.microsoft.com',
     'arc.net',
+    'balena.io',
     'balsamiq.com',
     'brave.com',
-    'digidesign.com',
-    'digidesign.com',
-    'gaomon.net',
-    'epson.com',
-    'fcix.net',
-    'xtom.com',
-    'gaomon.net',
-    'notion-static.com',
-    'notion.so',
-    'oracle.com',
-    'akmedia.digidesign.com',
     'canon.co.uk',
     'cdn.mozilla.net',
     'charlesproxy.com',
+    'cloudfront.net',
+    'cron.com',
     'csclub.uwaterloo.ca',
+    'c-wss.com',
+    'digidesign.com',
+    'discordapp.net',
+    'discord.com',
     'docker.com',
+    'dogado.de',
+    'download.prss.microsoft.com',
     'duckduckgo.com',
     'eclipse.org',
+    'epson.com',
+    'fcix.net',
+    'gaomon.net',
+    'getutm.app',
     'gimp.org',
     'github.io',
     'githubusercontent.com',
+    'google.ca',
     'grammarly.com',
     'integodownload.com',
+    'irccloud.com',
     'jetbrains.com',
+    'kagi.com',
     'libreoffice.org',
+    'logitech.com',
     'loom.com',
+    'macbartender.com',
     'microsoft.com',
     'minecraft.net',
     'mirrorservice.org',
     'mojang.com',
     'mozilla.org',
+    'mutedeck.com',
     'mysql.com',
+    'notion.so',
+    'notion-static.com',
     'ocf.berkeley.edu',
     'oobesaas.adobe.com',
+    'oracle.com',
     'osuosl.org',
     'pqrs.org',
-    'steampowered.com',
-    'c-wss.com',
-    'irccloud.com',
-    'discordapp.net',
-    'getutm.app',
-    'dogado.de',
-    'vc.logitech.com',
-    'steampowered.com',
-    'discord.com',
-    'logitech.com',
-    'skype.com',
-    'remarkable.com',
-    'balena.io',
-    'signal.org',
     'prusa3d.com',
-    'google.ca',
-    'zsa.io',
+    'remarkable.com',
+    'securew2.com',
+    'signal.org',
+    'skype.com',
     'slack-edge.com',
+    'stclairsoft.com',
+    'steampowered.com',
     'tableplus.com',
+    'teams.cdn.office.net',
+    'techsmith.com',
     'ubuntu.com',
     'umd.edu',
+    'usa.canon.com',
+    'vc.logitech.com',
     'virtualbox.org',
     'warp.dev',
-    'webex.com'
+    'webex.com',
+    'whatsapp.com',
+    'xtom.com',
+    'zoomgov.com',
+    'zoom.us',
+    'zsa.io'
   )
   AND host NOT IN (
-    'dl.google.com',
-    'www.google.com',
-    'warp-releases.storage.googleapis.com',
-    'mail.google.com',
-    'github.com',
-    'ubuntu.com',
     'balsamiq.com',
-    'tableplus.com',
+    'brave.com',
     'discord.com',
     'dl.discordapp.net',
-    'obsproject.com',
-    'www.messenger.com',
-    'brave.com',
-    'emacsformacosx.com',
-    'store.steampowered.com',
-    'wavebox.io',
-    'manual.canon',
-    'dygma.com',
+    'dl.google.com',
     'duckduckgo.com',
-    'obsidian.md'
+    'dygma.com',
+    'emacsformacosx.com',
+    'getkap.co',
+    'github.com',
+    'krisp.ai',
+    'mail.google.com',
+    'manual.canon',
+    'mutedeck.com',
+    'obdev.at',
+    'obsidian.md',
+    'obsproject.com',
+    'posit.co',
+    'proton.me',
+    'rancherdesktop.io',
+    'rectangleapp.com',
+    'stclairsoft.s3.amazonaws.com',
+    'store.steampowered.com',
+    'tableplus.com',
+    'textexpander.com',
+    'ubuntu.com',
+    'warp-releases.storage.googleapis.com',
+    'wavebox.io',
+    'www.google.com',
+    'www.messenger.com',
+    'zoom.us'
   )
   -- Yes, these are meant to be fairly broad.
   AND host NOT LIKE 'download%'
@@ -138,7 +165,10 @@ WHERE
   AND host NOT LIKE '%release%.storage.googleapis.com'
   AND NOT (
     host LIKE '%.fbcdn.net'
-    AND file.filename LIKE 'Messenger.%.dmg'
+    AND (
+      file.filename LIKE 'Messenger.%.dmg'
+      OR file.filename LIKE '%WhatsApp.dmg'
+    )
   )
 GROUP BY
   ea.value

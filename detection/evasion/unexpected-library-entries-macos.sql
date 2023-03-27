@@ -42,13 +42,11 @@ WHERE
     '/Library/Automator/',
     '/Library/Bluetooth/',
     '/Library/Caches/',
-    '/Library/Parallels/',
     '/Library/Catacomb/',
     '/Library/ColorPickers/',
     '/Library/ColorSync/',
     '/Library/Components/',
     '/Library/Compositions/',
-    '/Library/DropboxHelperTools/',
     '/Library/Compositions/.localized',
     '/Library/Contextual Menu Items/',
     '/Library/CoreAnalytics/',
@@ -86,14 +84,17 @@ WHERE
     '/Library/Logs/',
     '/Library/Mail/',
     '/Library/Managed Preferences/',
+    '/Library/Microsoft/',
     '/Library/Modem Scripts/',
     '/Library/Nessus/',
     '/Library/Objective-See/',
     '/Library/OpenDirectory/',
     '/Library/OSAnalytics/',
     '/Library/OSAnalytics/.DS_Store',
+    '/Library/Parallels/',
     '/Library/PDF Services/',
     '/Library/Perl/',
+    '/Library/ThunderboltAccessoryFirmwareUpdates/',
     '/Library/Plug-Ins/',
     '/Library/PreferencePanes/',
     '/Library/Preferences/',
@@ -119,6 +120,7 @@ WHERE
     '/Library/SystemExtensions/.staging/',
     '/Library/SystemMigration/',
     '/Library/SystemProfiler/',
+    '/Library/Tailscale/',
     '/Library/TeX/',
     '/Library/Updates/',
     '/Library/User Pictures/',
@@ -130,4 +132,14 @@ WHERE
     '/Library/WebServer/Documents/index.html.en',
     '/Library/WebServer/share/'
   )
-  AND NOT file.path LIKE '/Library/Caches/.0%'
+  -- Probably Adobe copy protection, my guess is the host serial number or MAC addr.
+  AND NOT REGEX_MATCH (
+    file.path,
+    '^/Library/Caches/\.([0-9ABCDEF]{12})$',
+    1
+  ) != ""
+  AND NOT (
+    file.path = '/Library/Caches/.DS_Store'
+    AND magic.data = 'Apple Desktop Services Store'
+    AND file.size < 9000
+  )

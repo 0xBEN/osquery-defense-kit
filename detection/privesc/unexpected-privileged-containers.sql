@@ -18,21 +18,24 @@ SELECT
   path,
   security_options,
   started_at,
-  image
+  image,
+  COALESCE(REGEX_MATCH (image, '(.*?):', 1), image) AS image_name
 FROM
   docker_containers
 WHERE
   privileged = 1
-  AND image NOT LIKE 'kindest/node:%'
-  AND image NOT LIKE 'ghcr.io/k3d-io/k3d-%'
-  AND image NOT LIKE 'docker.io/rancher/k3s:%'
-  AND image NOT LIKE 'melange-%'
-  -- this one makes me sad. It's due to limitations running bubblewrap in a container
-  AND image NOT IN (
+  AND image_name NOT IN (
     'cgr.dev/chainguard/melange',
     'cgr.dev/chainguard/sdk',
+    'cgr.dev/chainguard/wolfi-base',
     'distroless.dev/melange',
-    'distroless.dev/melange:latest',
-    'wolfi:test'
+    'docker.io/rancher/k3s',
+    'gcr.io/k8s-minikube/kicbase',
+    'ghcr.io/wolfi-dev/sdk',
+    'kindest/node',
+    'moby/buildkit',
+    'wolfi'
   )
+  AND image NOT LIKE 'ghcr.io/k3d-io/k3d-%'
+  AND image NOT LIKE 'melange-%'
   AND command NOT LIKE '/usr/bin/melange build %'

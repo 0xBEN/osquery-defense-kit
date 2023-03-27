@@ -14,6 +14,10 @@ SELECT
   protocol,
   s.remote_port,
   s.remote_address,
+  s.local_port,
+  s.local_address,
+  s.action,
+  s.status,
   p.name,
   p.path,
   p.cmdline AS child_cmd,
@@ -62,9 +66,16 @@ WHERE
     '1.1.1.2', -- Cloudflare
     '8.8.8.8', -- Google
     '8.8.4.4', -- Google (backup)
+    '4.2.2.1', -- Level 3
+    '4.2.2.2', -- Level 3
+    '4.2.2.3', -- Level 3
+    '4.2.2.4', -- Level 3
+    '4.2.2.5', -- Level 3
+    '4.2.2.6', -- Level 3
     '208.67.220.220', -- OpenDNS
     '208.67.222.222', -- OpenDNS
     '208.67.222.123', -- OpenDNS
+    '208.67.220.123', -- OpenDNS FamilyShield
     '75.75.75.75', -- Comcast
     '75.75.76.76', -- Comcast
     '68.105.28.13', -- Cox
@@ -75,17 +86,29 @@ WHERE
     'coredns,0.0.0.0,53',
     'syncthing,46.162.192.181,53',
     'Code Helper,208.67.222.123,53',
+    'Opera Helper,77.111.247.77,53',
+    'chrome,74.125.250.47,53',
     'Jabra Direct Helper,208.67.222.123,53'
   )
+  AND exception_key NOT LIKE 'Opera Helper,77.111.247.%,53'
   AND p.name != 'nessusd'
   -- Local DNS servers and custom clients go here
+  -- Electron apps
+  AND p.path NOT LIKE '/private/var/folders/%/T/AppTranslocation/%/%.app/Contents/MacOS/% Helper'
+  AND p.path NOT LIKE '/Applications/%.app/Contents/MacOS/% Helper'
+  AND p.path NOT LIKE '/Volumes/Google Chrome/%.app/Contents/MacOS/% Helper'
   AND p.path NOT IN (
-    '/usr/lib/systemd/systemd-resolved',
     '/Library/Nessus/run/sbin/nessusd',
-    '/Applications/Slack.app/Contents/Frameworks/Slack Helper.app/Contents/MacOS/Slack Helper',
-    '/Applications/Spotify.app/Contents/Frameworks/Spotify Helper.app/Contents/MacOS/Spotify Helper'
+    '/opt/google/chrome/chrome',
+    '/usr/bin/apko',
+    '/sbin/apk',
+    '/System/Volumes/Preboot/Cryptexes/Incoming/OS/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking',
+    '/usr/lib/systemd/systemd-resolved'
   )
+  -- Chromium apps can send stray DNS packets
   AND p.path NOT LIKE '/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/%/Helpers/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper'
+  AND p.path NOT LIKE '/Applications/Brave Browser.app/Contents/Frameworks/Brave Browser Framework.framework/Versions/%/Helpers/Brave Browser Helper.app/Contents/MacOS/Brave Browser Helper'
+  AND p.path NOT LIKE '/Applications/Opera.app/Contents/Frameworks/Opera Framework.framework/Versions/%/Helpers/Opera Helper.app/Contents/MacOS/Opera Helper'
   -- Workaround for the GROUP_CONCAT subselect adding a blank ent
 GROUP BY
   s.remote_address,
