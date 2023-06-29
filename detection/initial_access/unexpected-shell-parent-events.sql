@@ -16,6 +16,7 @@ SELECT
   REGEX_MATCH (pe.path, '.*/(.*)', 1) AS p0_name,
   TRIM(pe.cmdline) AS p0_cmd,
   pe.cwd AS p0_cwd,
+  pe.time AS p0_time,
   pe.pid AS p0_pid,
   pe.euid AS p0_euid,
   p.cgroup_path AS p0_cgroup,
@@ -197,6 +198,7 @@ WHERE
       '/bin/bash /usr/local/bin/mount-product-files',
       '/bin/sh -c black .',
       '/bin/sh -c lsb_release -a --short',
+      '/bin/sh -c ioreg -rd1 -c IOPlatformExpertDevice',
       '/bin/sh -c ps ax -ww -o pid,ppid,uid,gid,args',
       '/bin/sh -c scutil --get ComputerName',
       "/bin/sh -c defaults delete 'com.cisco.webexmeetingsapp'",
@@ -242,21 +244,30 @@ WHERE
     OR exception_key IN (
       'bash,0,etcd,containerd-shim-runc-v2',
       'bash,0,kube-apiserver,containerd-shim-runc-v2',
+      'bash,0,perl5.30,system_installd',
       'bash,0,pia-daemon,launchd',
       'bash,0,udevadm,udevadm',
+      'bash,500,busybox,bwrap',
       'bash,500,com.docker.dev-envs,com.docker.backend',
       'bash,500,Foxit PDF Reader,launchd',
+      'bash,500,script,bash',
+      'sh,500,LogiTune,launchd',
+      'bash,500,docker-builder,bash',
+      'bash,500,Hyprland,gdm-wayland-session',
       'bash,500,gnome-session-binary,systemd',
       'bash,500,gpg-agent,launchd',
+      'bash,500,lazygit,nvim',
       'bash,500,.man-wrapped,zsh',
       'bash,500,Private Internet Access,launchd',
+      'bash,500,steam,bash',
       'bash,500,xdg-desktop-portal,systemd',
+      'dash,0,dpkg,apt',
       'dash,0,anacron,systemd',
+      'dash,0,dpkg,python3.10',
       'dash,0,kindnetd,containerd-shim-runc-v2',
       'dash,0,kube-proxy,containerd-shim-runc-v2',
       'dash,0,run-parts,dash',
       'dash,0,snapd,systemd',
-      'bash,0,perl5.30,system_installd',
       'sh,0,auditd,launchd',
       'sh,500,cloud_sql_proxy,zsh',
       'sh,500,docs,zsh',
@@ -276,6 +287,7 @@ WHERE
     OR p0_cmd LIKE '/bin/bash /usr/bin/xdg-settings check %'
     OR p0_cmd LIKE '/bin/bash /usr/local/Homebrew/%'
     OR p0_cmd LIKE '/bin/sh %/bin/gcloud%config config-helper%'
+    OR p0_cmd LIKE '/bin/sh %/google-cloud-sdk/bin/gcloud config get project'
     OR p0_cmd LIKE '/bin/sh -c pkg-config %'
     OR p0_cmd LIKE '/bin/sh %/docker-credential-gcloud get'
     OR p0_cmd LIKE '/bin/bash %git credential-osxkeychain get'
@@ -289,6 +301,7 @@ WHERE
     OR p0_cmd LIKE '%sh -c ntia-checker %'
     OR p0_cmd LIKE '%/google-chrome% --flag-switches-begin % --product-version'
     OR p1_cmd LIKE '%/bin/pipenv shell'
+    OR p1_cmd LIKE '/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/bin/ruby -W1 --disable=gems,rubyopt -- /Users/%/homebrew/Library/Homebrew/build.rb%'
     OR p1_cmd LIKE 'gcloud% auth%login%'
     OR p1_cmd LIKE '/%google-cloud-sdk/lib/gcloud.py%'
     OR (

@@ -2,6 +2,7 @@
 SELECT
   -- Child
   pe.path AS p0_path,
+  pe.time AS p0_time,
   s.authority AS p0_sauth,
   s.identifier AS p0_sid,
   hash.sha256 AS p0_hash,
@@ -14,6 +15,7 @@ SELECT
   -- Parent
   pe.parent AS p1_pid,
   TRIM(COALESCE(p1.cmdline, pe1.cmdline)) AS p1_cmd,
+  COALESCE(p1.start_time, pe1.time) AS p1_start,
   COALESCE(p1.path, pe1.path) AS p1_path,
   p1.cwd AS p1_cwd,
   COALESCE(p_hash1.sha256, pe_hash1.sha256) AS p1_hash,

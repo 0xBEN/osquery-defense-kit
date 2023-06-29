@@ -5,6 +5,7 @@
 SELECT
   file.mode AS p0_binary_mode,
   pe.cmdline_size AS p0_cmd_size,
+  pe.time AS p0_time,
   -- Child
   pe.path AS p0_path,
   REGEX_MATCH (pe.path, '.*/(.*)', 1) AS p0_name,
@@ -59,3 +60,5 @@ WHERE
   pe.time > (strftime('%s', 'now') -300)
   AND file.mode NOT LIKE '0%'
   AND pe.cmdline_size > 2048
+  AND p0_cmd NOT LIKE '%sudo dpkg %'
+  AND p0_cmd NOT LIKE '%sudo %--vmodule=% --audit-policy-file=%kube%'

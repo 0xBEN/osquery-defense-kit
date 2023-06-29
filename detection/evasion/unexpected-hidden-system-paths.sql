@@ -15,8 +15,9 @@ SELECT
   uid,
   gid,
   mode,
+  atime,
+  btime,
   mtime,
-  ((strftime('%s', 'now') - file.ctime) / 86400) AS mtime_age_days,
   ctime,
   type,
   size,
@@ -66,29 +67,41 @@ WHERE
     '/etc/.resolv.conf.systemd-resolved.bak',
     '/etc/selinux/.config_backup',
     '/etc/skel/.mozilla/',
+    '/etc/.#sudoers',
     '/.file',
+    '/.lesshst',
     '/lib/jvm/.java-1.17.0-openjdk-amd64.jinfo',
+    '/.mozilla/',
+    '/tmp/.accounts-agent/',
+    '/tmp/.audio-agent/',
+    '/var/root/.docker/',
     '/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress',
+    '/tmp/.content-agent/',
     '/tmp/._contentbarrier_installed',
+    '/tmp/.docker/',
+    '/tmp/.docker-tmp/',
     '/tmp/.dotnet/',
     '/tmp/.dracula-tmux-data',
     '/tmp/.dracula-tmux-weather.lock',
     '/tmp/.DS_Store',
+    '/tmp/.eos-update-notifier.log',
+    '/tmp/.featureflags-agent/',
     '/tmp/.font-unix/',
     '/tmp/.go-version',
     '/tmp/.ICE-unix/',
+    '/tmp/.last_survey_prompt.yaml',
+    '/tmp/.last_update_check.json',
+    '/tmp/.metrics-agent/',
+    '/tmp/.settings-agent/',
     '/tmp/.terraform/',
     '/tmp/.terraform.lock.hcl',
-    '/tmp/.last_update_check.json',
-    '/tmp/.last_survey_prompt.yaml',
     '/tmp/.Test-unix/',
-    '/tmp/.docker/',
-    '/tmp/.docker-tmp/',
+    '/tmp/.ui-agent/',
+    '/tmp/.updater-agent/',
     '/tmp/.vbox-t-ipc/',
     '/tmp/.X0-lock',
     '/tmp/.X11-unix/',
     '/tmp/.X1-lock',
-    '/tmp/.eos-update-notifier.log',
     '/tmp/.X2-lock',
     '/tmp/.XIM-unix/',
     '/usr/lib/jvm/.java-1.17.0-openjdk-amd64.jinfo',
@@ -103,7 +116,6 @@ WHERE
     '/var/db/.StagedAppleUpgrade',
     '/var/db/.SystemPolicy-default',
     '/var/.ntw_cache',
-    '/var/setup/.TemporaryItems',
     '/var/.Parallels_swap/',
     '/var/.pwd_cache',
     '/var/root/.bash_history',
@@ -111,6 +123,7 @@ WHERE
     '/var/root/.cache/',
     '/var/root/.CFUserTextEncoding',
     '/var/root/.forward',
+    '/var/root/.lesshst',
     '/var/root/.nix-channels',
     '/var/root/.nix-defexpr/',
     '/var/root/.nix-profile/',
@@ -121,17 +134,21 @@ WHERE
     '/var/run/.sim_diagnosticd_socket',
     '/var/run/.vfs_rsrc_streams_0x2b725bbfb94ba4ef0/',
     '/var/setup/.AppleSetupUser',
+    '/var/setup/.TemporaryItems',
     '/var/setup/.TemporaryItems/',
+    '/var/tmp/.ses.bak',
     '/.vol/',
     '/.VolumeIcon.icns'
   )
   AND file.directory NOT IN ('/etc/skel', '/etc/skel/.config')
   AND file.path NOT LIKE '/%bin/bootstrapping/.default_components'
   AND file.path NOT LIKE '/tmp/.#%'
+  AND file.path NOT LIKE '/tmp/.lark_cache_%'
   AND file.path NOT LIKE '/tmp/.wine-%'
   AND file.path NOT LIKE '/tmp/.%.gcode'
   AND file.path NOT LIKE '/tmp/.vbox-%-ipc/'
   AND file.path NOT LIKE '/tmp/.io.nwjs.%'
+  AND file.path NOT LIKE '/tmp/.xfsm-ICE-%'
   AND file.path NOT LIKE '/tmp/.com.google.Chrome.%'
   AND file.path NOT LIKE '/tmp/.org.chromium.Chromium%'
   AND file.path NOT LIKE '/var/run/.vfs_rsrc_streams_%/'
@@ -140,6 +157,8 @@ WHERE
   AND file.path NOT LIKE '%/.build-id/'
   AND file.path NOT LIKE '%/.dwz/'
   AND file.path NOT LIKE '%/.updated'
+  AND file.filename NOT LIKE '.%.swo'
+  AND file.filename NOT LIKE '.%.swp'
   AND file.path NOT LIKE '%/google-cloud-sdk/.install/'
   AND NOT (
     type = 'regular'
@@ -158,8 +177,7 @@ WHERE
     AND file.gid = 0
     AND file.mode IN ('0755', '0700')
     AND file.size < 4
-  )
-  -- Ecamm Live
+  ) -- Ecamm Live
   AND NOT (
     file.path LIKE "/tmp/.elive%"
     AND file.size < 7

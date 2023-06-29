@@ -18,6 +18,7 @@ SELECT
   REGEX_MATCH (pe.path, '.*/(.*)', 1) AS p0_name,
   TRIM(pe.cmdline) AS p0_cmd,
   pe.cwd AS p0_cwd,
+  pe.time AS p0_time,
   pe.pid AS p0_pid,
   pe.euid AS p0_euid,
   s.authority AS p0_authority,
@@ -102,6 +103,7 @@ WHERE
       OR p1_cmd LIKE '%aws %sso%'
       OR p1_cmd LIKE '%gcloud% auth %login%'
       OR p1_cmd LIKE '% /opt/homebrew/bin/jupyter%notebook'
+      OR p1_cmd LIKE '/bin/sh %/opt/homebrew/bin/git-gui%'
       OR p1_authority = 'Developer ID Application: Docker Inc (9BNSXJN65R)'
       OR p1_name IN ('yubikey-agent')
       OR (
@@ -111,6 +113,10 @@ WHERE
     )
   )
   -- The following apply to all uids
-  AND NOT p0_cmd = 'osascript -e user locale of (get system info)'
+  AND NOT p0_cmd IN (
+    'osascript -e do shell script "/bin/rm -Rf /opt/vagrant /usr/local/bin/vagrant" with administrator privileges',
+    'osascript -e user locale of (get system info)',
+    '/usr/bin/osascript -e do shell script "/bin/rm -Rf /opt/vagrant /usr/local/bin/vagrant" with administrator privileges'
+  )
 GROUP BY
   pe.pid

@@ -40,6 +40,7 @@ WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-par
   child_name IN ('curl', 'wget', 'ftp', 'tftp') -- And not a regular local user
   AND NOT exception_key IN (
     'curl,0,09-timezone,nm-dispatcher',
+    'curl,0,sh,qualys-cloud-ag',
     'curl,0,build.sh,buildkit-runc',
     'curl,0,nm-dispatcher,',
     'curl,0,nm-dispatcher,nm-dispatcher',
@@ -48,8 +49,10 @@ WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-par
     'curl,302,bash,nix',
     'curl,303,bash,nix',
     'curl,305,bash,nix',
+    'curl,500,nvim,nvim',
     'curl,307,bash,nix',
     'curl,500,bash,bash',
+    'curl,0,sh,qualys-scan-uti',
     'curl,500,bash,fakeroot',
     'curl,500,bash,fish',
     'curl,500,bash,nix-daemon',
@@ -57,6 +60,7 @@ WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-par
     'curl,500,bash,zsh',
     'curl,500,env,env',
     'curl,500,eos-connection-,eos-update-noti',
+    'curl,0,eos-rankmirrors,eos-rankmirrors',
     'curl,500,fish,gnome-terminal-',
     'curl,500,launchd,kernel_task',
     'curl,500,makepkg,yay',
@@ -81,6 +85,8 @@ WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-par
       'login',
       'roxterm',
       'tmux',
+      'stable',
+      'old',
       'tmux:server',
       'wezterm-gui',
       'zsh'
@@ -100,7 +106,7 @@ WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-par
   AND NOT (
     p.euid > 500
     AND parent_name = 'ruby'
-    AND parent_cmd LIKE '%/opt/homebrew/Library/Homebrew/brew.rb%'
+    AND parent_cmd LIKE '%/Library/Homebrew/brew.rb%'
   )
   AND NOT (
     p.euid > 500
@@ -122,5 +128,6 @@ WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-par
     AND parent_name = 'ruby'
     AND p.cmdline LIKE '/usr/bin/curl --disable --cookie /dev/null --globoff --show-error --user-agent Homebrew/%'
   )
+  AND NOT p.cgroup_path LIKE '/system.slice/docker-%'
 GROUP BY
   p.pid

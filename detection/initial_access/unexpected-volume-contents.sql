@@ -83,14 +83,17 @@ WHERE
     '.angular-config.json',
     '.mysql_history',
     '.lesshst',
+    'pve-installer.squashfs',
     '.gitconfig',
     '.flyrc',
     '.dbshell',
     '.bash_history',
     '.bashrc',
     '.disk_label_2x',
+    '.pdfbox.cache',
     '.DS_Store',
     '.file',
+    'UFRII_LT_LIPS_LX_Installer.pkg',
     'LogiPresentation Installer.app',
     '.file-revisions-by-id',
     '._Id.txt',
@@ -109,15 +112,24 @@ WHERE
   AND authority NOT IN (
     'Developer ID Application: Google LLC (EQHXZ8M8AV)',
     'Developer ID Application: Canon Inc. (XE2XNRRXZ5)',
+    'Developer ID Application: Dropbox, Inc. (G7HH3F8CAK)',
     'Developer ID Application: Logitech Inc. (QED4VVPZWA)',
     'Developer ID Application: Adobe Inc. (JQ525L2MZD)'
   ) -- Unsigned programs here
   AND trimpath NOT IN (
     '/Volumes/Google Chrome/.keystone_install',
     '/Volumes/Google Chrome Canary/.keystone_install',
+    '/Volumes/macFUSE/Install macFUSE.pkg',
+    '/Volumes/macFUSE/.engine_install',
     '/Volumes/Garmin Express/Install Garmin Express.pkg',
     '/Volumes/PMHOME_3601DL/PMH_INST.pkg',
     '/Volumes/Jabra Direct Setup/JabraDirectSetup.pkg'
   )
   AND trimpath NOT LIKE '/Volumes/JDK %/JDK %.pkg'
+  AND trimpath NOT LIKE '/Volumes/Google Earth Pro%/Install Google Earth Pro%.pkg'
   AND trimpath NOT LIKE '/Volumes/mysql-shell-%/mysql-shell-%.pkg'
+  AND magic.data NOT LIKE 'ASCII text%'
+  AND NOT (
+    magic.data = 'AppleDouble encoded Macintosh file'
+    AND basename LIKE '._%'
+  )

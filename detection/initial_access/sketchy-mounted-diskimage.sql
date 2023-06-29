@@ -63,11 +63,16 @@ WHERE
       AND file.mode LIKE "%7%"
       AND file.type != 'directory'
       AND magic.data LIKE '%script%'
+      AND signature.identifier != 'net.snowflake.snowsql'
+      AND signature.authority NOT IN (
+        'Developer ID Application: Allen Bai (97DN42T837)',
+        'Developer ID Application: Galvanix (5BRAQAFB8B)'
+      )
     ) -- Rule 2. App binaries that have mixed-caps names such as LYwjtu0sc3XqkNVbQe_gM4YiRpmgUpRIew or yWnBJLaF (AdobeFlashPlayer_567.app)
     OR (
       file.mode LIKE "%7%"
       AND file.type != 'directory'
-      AND REGEX_MATCH (file.filename, '([a-z]+[A-Z]+[a-z]+[A-Z])', 1) != ""
+      AND REGEX_MATCH (file.filename, '([a-z]+[A-Z][A-Z]+[a-z]+)', 1) != ""
       AND magic.data LIKE "%executable%"
       -- Some people do weird things!
       AND signature.authority NOT IN (
@@ -95,7 +100,10 @@ WHERE
         OR vol_name LIKE "%Update"
       )
       AND file.directory LIKE "/Volumes/%/Contents/MacOS"
-      AND signature.authority != "Developer ID Application: Logitech Inc. (QED4VVPZWA)"
+      AND signature.authority NOT IN (
+        "Developer ID Application: Logitech Inc. (QED4VVPZWA)",
+        "Developer ID Application: VideoLAN (75GAHG3SZQ)"
+      )
     ) --   6. Volumes containing a hidden top-level folder or binary, such as yWnBJLaF (1302.app)
     OR (
       file.bsd_flags = "HIDDEN"
@@ -104,15 +112,26 @@ WHERE
         OR file.mode LIKE "%5%"
         OR file.mode LIKE "%1%"
       )
-      AND file.filename NOT IN ('.Trashes', '.background')
+      AND file.filename NOT IN (
+        '.Trashes',
+        '.background',
+        '.VolumeIcon.icns',
+        '.TemporaryItems'
+      )
+      -- Brother Printer Utilities
+      AND f != '/Volumes/brotherwdswML_nonPanel/MacResources'
       AND file.filename NOT LIKE '%.previous'
       AND file.filename NOT LIKE '%.interrupted'
+      AND signature.authority != 'Developer ID Application: Google LLC (EQHXZ8M8AV)'
       AND file.filename NOT LIKE '%.backup'
     ) --   7. Volumes containing a top-level symlink to something other than /Applications, such as yWnBJLaF (1302.app)
     OR (
       file.symlink = 1
       AND magic.data != 'symbolic link to /Applications'
       AND magic.data != 'symbolic link to /Applications/'
+      AND magic.data != 'symbolic link to .'
+      -- emacs
+      AND magic.data != 'symbolic link to bin-x86%'
       AND magic.data NOT LIKE 'symbolic link to /Users/%/My Drive'
       AND magic.data NOT LIKE 'symbolic link to /Library/Application Support/Apple/Safari/SafariForWebKitDevelopment'
     )

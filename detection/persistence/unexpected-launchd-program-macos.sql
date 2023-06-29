@@ -31,9 +31,12 @@ WHERE
   AND program IS NOT NULL
   AND program_authority NOT IN (
     'Developer ID Application: Adobe Inc. (JQ525L2MZD)',
+    'Developer ID Application: Canonical Group Limited (X4QN7LTP59)',
+    'Developer ID Application: Creative Labs Pte. Ltd. (5Q3552844F)',
     'Developer ID Application: Docker Inc (9BNSXJN65R)',
     'Developer ID Application: Kandji, Inc. (P3FGV63VK7)',
     'Developer ID Application: Logitech Inc. (QED4VVPZWA)',
+    'Developer ID Application: Louis Pontoise (QXD7GW8FHY)',
     'Developer ID Application: Microsoft Corporation (UBF8T346G9)',
     'Developer ID Application: Objective Development Software GmbH (MLZF7K7B5R)',
     'Developer ID Application: Oracle America, Inc. (VB5E2TV963)',
@@ -48,4 +51,5 @@ WHERE
     AND program_identifier IN ('com.apple.ln', 'com.apple.link')
     AND program_arguments LIKE '/bin/ln -s -f /Users/%/run/docker.sock /var/run/docker.sock'
   )
-  GROUP BY l.path
+GROUP BY
+  l.path

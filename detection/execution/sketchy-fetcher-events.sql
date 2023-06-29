@@ -14,6 +14,7 @@ SELECT
   TRIM(pe.cmdline) AS p0_cmd,
   pe.cwd AS p0_cwd,
   pe.pid AS p0_pid,
+  pe.time AS p0_time,
   p.cgroup_path AS p0_cgroup,
   -- Parent
   pe.parent AS p1_pid,
@@ -186,6 +187,7 @@ WHERE
       OR addr NOT LIKE '%.%'
       OR ip LIKE '172.2%'
       OR ip LIKE '192.168.%'
+      OR ip LIKE '127.%'
     )
   )
   AND NOT p1_cmd LIKE '/usr/bin/bash /usr/bin/makepkg %'

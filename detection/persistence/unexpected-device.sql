@@ -60,6 +60,7 @@ WHERE
     '/dev/bus/',
     '/dev/bus/usb',
     '/dev/cdrom',
+    '/dev/cec',
     '/dev/char/',
     '/dev/char/:',
     '/dev/console',
@@ -168,6 +169,8 @@ WHERE
     '/dev/sgx_provision',
     '/dev/sgx_vepc',
     '/dev/shm/',
+    '/dev/shm/i-log-',
+    '/dev/shm/libpod_lock',
     '/dev/shm/libpod_rootless_lock_',
     '/dev/shm/pulse-shm-',
     '/dev/snapshot',
@@ -191,6 +194,7 @@ WHERE
     '/dev/ttyACM',
     '/dev/ttyprintk',
     '/dev/ttyS',
+    '/dev/ttyUSB',
     '/dev/udmabuf',
     '/dev/uhid',
     '/dev/uinput',
@@ -236,7 +240,8 @@ WHERE
     '/dev/zvol/rpool'
   )
   AND NOT path LIKE '/dev/mapper/%'
+  AND NOT path LIKE '/dev/shm/sem.rpc%'
+  AND NOT path LIKE '/dev/mqueue/us.zoom.aom.%'
+  AND NOT path LIKE '/dev/shm/aomshm.%'
   AND NOT path LIKE '/dev/shm/u%-Shm_%'
   AND NOT path LIKE '/dev/shm/u%-ValveIPC%'
-  AND NOT path LIKE '/dev/shm/aomshm.%.'
-  AND NOT path LIKE '/dev/mqueue/us.zoom.aom.%'

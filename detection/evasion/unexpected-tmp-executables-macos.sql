@@ -14,6 +14,7 @@ SELECT DISTINCT
   file.btime,
   file.ctime,
   file.mtime,
+  file.type,
   file.size,
   hash.sha256,
   magic.data,
@@ -54,6 +55,7 @@ WHERE -- Optimization: don't join things until we have a whittled down list of f
         AND (
           file.path LIKE '%/go-build%'
           OR file.path LIKE '%/bin/%'
+          OR file.path LIKE '%/sbin/%'
           OR file.path LIKE '/tmp/%ctl'
           OR file.path LIKE '%/CCLBS/%'
           OR file.path LIKE '%/checkout/%'
@@ -73,6 +75,7 @@ WHERE -- Optimization: don't join things until we have a whittled down list of f
           OR file.path LIKE '%/kots/%'
           OR file.path LIKE '/tmp/%/AdobePIM.dylib'
           OR file.path LIKE "%/lib/%.so"
+          OR file.path LIKE '/tmp/melange%'
           OR file.path LIKE "%/lib/%.so.%"
           OR file.path LIKE '%/pdf-tools/%'
           OR file.path LIKE '%/Photoshop Installer.app/Contents/%'
@@ -108,6 +111,7 @@ WHERE -- Optimization: don't join things until we have a whittled down list of f
       ) -- macOS updates
       AND NOT file.directory LIKE '/tmp/msu-target-%' -- I don't know man. I don't work here.
       AND NOT file.directory LIKE '/tmp/UpdateBrain-%/AssetData/com.apple.MobileSoftwareUpdate.UpdateBrainService.xpc/Contents/MacOS' -- terraform
+      AND NOT file.directory LIKE '/tmp/staged-updates%'
       AND NOT (
         uid > 500
         AND file.path LIKE '/tmp/terraform_%/terraform'
@@ -133,12 +137,12 @@ WHERE -- Optimization: don't join things until we have a whittled down list of f
     AND (
       magic.data IN ('JSON data', 'ASCII text')
       OR magic.data LIKE 'ELF %-bit %SB executable%'
-      OR magic.data LIKE 'symbolic link to l%.so.%'
+      OR magic.data LIKE 'symbolic link to %'
       OR magic.data LIKE 'ELF %-bit LSB shared object%'
       OR magic.data LIKE 'libtool library file,%'
       OR (
-        file.filename IN ("configure", "mkinstalldirs")
-        AND magic.data = "POSIX shell script, ASCII text executable"
+        file.filename IN ("configure", "mkinstalldirs", "config.status")
+        AND magic.data LIKE "POSIX shell script, ASCII text executable%"
       )
       OR (
         file.size < 50000
@@ -157,6 +161,7 @@ WHERE -- Optimization: don't join things until we have a whittled down list of f
           'py',
           'script',
           'sh',
+          'status',
           'strings',
           'txt',
           'yaml',

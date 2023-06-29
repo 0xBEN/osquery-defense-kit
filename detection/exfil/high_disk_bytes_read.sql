@@ -57,10 +57,12 @@ WHERE
   AND p0.name NOT IN (
     'bash',
     'bwrap',
+    'cargo',
     'chrome',
     'clamscan',
     'code',
     'com.apple.NRD.UpdateBrainService',
+    'dnf',
     'docker',
     'electron',
     'emacs',
@@ -69,6 +71,7 @@ WHERE
     'fleet_backend',
     'fsdaemon',
     'fsnotifier',
+    'gnome-software',
     'go',
     'golangci-lint',
     'GoogleSoftwareUpdateAgent',
@@ -81,6 +84,7 @@ WHERE
     'kue',
     'launcher',
     'LogiFacecamService',
+    'mediawriter',
     'melange',
     'nautilus',
     'nessusd',
@@ -95,14 +99,17 @@ WHERE
     'Safari',
     'sh',
     'slack',
+    'spotify',
     'steam',
     'systemd',
+    'terraform-provider-apko',
     'thunderbird',
     'tilt',
     'unattended-upgr',
     'vim',
     'wineserver',
     'yay',
+    'yum',
     'ykman-gui',
     'zsh',
     'ZwiftAppMetal'
@@ -111,9 +118,11 @@ WHERE
     '/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.BrowserDataImportingService.xpc/Contents/MacOS/com.apple.Safari.BrowserDataImportingService',
     '/System/Volumes/Preboot/Cryptexes/Incoming/OS/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent',
     '/usr/bin/apt',
+    '/app/libexec/mediawriter/helper',
     '/usr/bin/darktable',
     '/usr/bin/dockerd',
     '/usr/bin/gnome-shell',
+    '/usr/bin/gnome-software',
     '/usr/bin/udevadm',
     '/usr/bin/update-notifier',
     '/usr/lib64/electron/electron',
@@ -128,6 +137,7 @@ WHERE
     '/usr/libexec/signpost_reporter',
     '/usr/libexec/syspolicyd',
     '/usr/libexec/tracker-miner-fs-3',
+    '/usr/libexec/tracker-extract-3',
     '/usr/lib/systemd/systemd',
     '/usr/sbin/spindump',
     '/usr/sbin/systemstats'
@@ -141,9 +151,10 @@ WHERE
     AND p0.path LIKE '/tmp/.mount_jet%/jetbrains-toolbox'
   )
   AND NOT (
-    p0.name = 'com.apple.MobileSoftwareUpdate.UpdateBrainService'
-    AND p0.path LIKE '/private/var/db/com.apple.xpc.roleaccountd.staging/com.apple.MobileSoftwareUpdate.UpdateBrainService.%.xpc/Contents/MacOS/com.apple.MobileSoftwareUpdate.UpdateBrainService'
+    p0.name LIKE 'gopls_%'
+    AND p0.path LIKE '%gopls/gopls%'
   )
+  AND NOT p0.path LIKE '/private/var/db/com.apple.xpc.roleaccountd.staging/%com.apple.MobileSoftwareUpdate.UpdateBrainService.%.xpc/Contents/MacOS/com.apple.MobileSoftwareUpdate.UpdateBrainService'
   AND NOT (
     p0.name = 'FindMy'
     AND p0.path = '/System/Applications/FindMy.app/Contents/MacOS/FindMy'
@@ -174,7 +185,10 @@ WHERE
     p0.name = ""
     AND p1.name = "nvim"
   )
-  AND NOT (p0.path LIKE '/home/%/Apps/PhpStorm%/jbr/bin/java')
+  AND NOT p0_cmd LIKE '%/gcloud.py components update'
+  AND NOT (
+    p0.path LIKE '/home/%/Apps/PhpStorm%/jbr/bin/java'
+  )
   AND NOT p0.cgroup_path LIKE '/system.slice/docker-%'
 GROUP BY
   p0.pid

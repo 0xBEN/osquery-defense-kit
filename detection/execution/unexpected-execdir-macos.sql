@@ -8,12 +8,15 @@
 -- platform: darwin
 -- tags: transient seldom process filesystem state
 SELECT DISTINCT
-  REGEX_MATCH (p0.path, '(.*)/', 1) AS dir,
+  COALESCE(REGEX_MATCH (p0.path, '(.*)/', 1), p0.path) AS dir,
   REPLACE(f.directory, u.directory, '~') AS homedir,
-  REGEX_MATCH (
-    REPLACE(f.directory, u.directory, '~'),
-    '(~/.*?/.*?/.*?/)',
-    1
+  COALESCE(
+    REGEX_MATCH (
+      REPLACE(f.directory, u.directory, '~'),
+      '(~/.*?/.*?/.*?/)',
+      1
+    ),
+    REPLACE(f.directory, u.directory, '~')
   ) AS top3_homedir,
   REGEX_MATCH (
     REPLACE(f.directory, u.directory, '~'),
@@ -24,6 +27,7 @@ SELECT DISTINCT
   s.identifier AS p0_id,
   -- Child
   p0.pid AS p0_pid,
+  p0.start_time AS p0_start,
   p0.path AS p0_path,
   p0.name AS p0_name,
   p0.cmdline AS p0_cmd,
@@ -32,6 +36,7 @@ SELECT DISTINCT
   p0_hash.sha256 AS p0_sha256,
   -- Parent
   p0.parent AS p1_pid,
+  p1.start_time AS p1_start,
   p1.path AS p1_path,
   p1.name AS p1_name,
   p1_f.mode AS p1_mode,
@@ -71,7 +76,7 @@ WHERE
     GROUP BY
       path
   )
-  AND dir NOT IN (
+  AND NOT dir IN (
     '/Library/Application Support/Logitech.localized/Logitech Options.localized/LogiMgrUpdater.app/Contents/Resources',
     '/Library/DropboxHelperTools/Dropbox_u501',
     '/Library/Filesystems/kbfuse.fs/Contents/Resources',
@@ -92,25 +97,24 @@ WHERE
     '/opt/X11/libexec',
     '/run/current-system/sw/bin'
   )
-  AND homedir NOT IN (
+  AND NOT homedir IN (
     '~/bin',
     '~/code/bin',
     '~/Downloads/google-cloud-sdk/bin',
     '~/go/bin',
-    '~/Library/Application Support/cloud-code/installer/google-cloud-sdk/bin',
-    '~/Library/Application Support/dev.warp.Warp-Stable',
-    '~/Library/Application Support/zoom.us/Plugins/aomhost.app/Contents/MacOS',
+    '~/.cache/gitstatus',
     '~/.local/share/gh/extensions/gh-sbom',
     '~/.local/bin',
     '~/.magefile',
     '~/projects/go/bin'
   )
-  AND top_homedir NOT IN (
+  AND NOT top_homedir IN (
     '~/Applications/',
     '~/Applications (Parallels)/',
     '~/bin/',
     '~/.cargo/',
     '~/code/',
+    '~/.Trash/',
     '~/Code/',
     '~/.steampipe/',
     '~/.config/',
@@ -120,8 +124,6 @@ WHERE
     '~/google-cloud-sdk/',
     '~/homebrew/',
     '~/.kuberlr/',
-    -- '~/Library/',
-    -- '~/.local/',
     '~/Parallels/',
     '~/proj/',
     '~/projects/',
@@ -136,15 +138,11 @@ WHERE
     '~/.vscode/',
     '~/.vs-kubernetes/'
   )
-  AND top3_homedir NOT IN (
-    '~/Library/Application Support/BraveSoftware/',
-    '~/Library/Application Support/com.elgato.StreamDeck/',
+  AND NOT top3_homedir IN (
     '/Library/Application Support/EcammLive',
-    '~/Library/Application Support/Foxit Software/',
-    '~/Library/Application Support/OpenLens',
-    '~/Library/Application Support/Zwift/',
     '~/Library/Caches/com.mimestream.Mimestream/',
     '~/Library/Caches/com.sempliva.Tiles/',
+    '~/Library/Caches/JetBrains/',
     '~/Library/Caches/org.gpgtools.updater/',
     '~/Library/Caches/snyk/',
     '/Library/Developer/Xcode/',
@@ -166,12 +164,11 @@ WHERE
   AND dir NOT LIKE '/Volumes/com.getdropbox.dropbox-%'
   AND homedir NOT LIKE '~/%/google-cloud-sdk/bin/%'
   AND homedir NOT LIKE '~/Library/Caches/ms-playwright/%'
-  AND homedir NOT LIKE '~/%/node_modules/.pnpm/%'
-  AND homedir NOT LIKE '~/%/node_modules/.bin/%'
+  AND homedir NOT LIKE '~/%/node_modules/%'
   AND homedir NOT LIKE '~/.local/%/packages/%'
   AND homedir NOT LIKE '~/Library/Printers/%/Contents/MacOS'
   AND homedir NOT LIKE '~/Library/Caches/%/org.sparkle-project.Sparkle/Launcher/%/Updater.app/Contents/MacOS'
-  AND homedir NOT LIKE '~/Library/Application Support/cloud-code/bin/versions/%'
+  AND homedir NOT LIKE '~/Library/Application Support/%'
   AND s.authority NOT IN (
     'Apple iPhone OS Application Signing',
     'Apple Mac OS Application Signing',
@@ -181,6 +178,7 @@ WHERE
     'Developer ID Application: Corsair Memory, Inc. (Y93VXCB8Q5)',
     'Developer ID Application: Docker Inc (9BNSXJN65R)',
     'Developer ID Application: Dropbox, Inc. (G7HH3F8CAK)',
+    'Developer ID Application: EnterpriseDB Corporation (26QKX55P9K)',
     'Developer ID Application: Figma, Inc. (T8RA8NE3B7)',
     'Developer ID Application: GEORGE NACHMAN (H7V7XYVQ7D)',
     'Developer ID Application: Google LLC (EQHXZ8M8AV)',
@@ -204,4 +202,8 @@ WHERE
     s.identifier = "a.out"
     AND homedir LIKE '~/%'
     AND p1.name LIKE '%sh'
+    AND p2.name = 'login'
+    AND p0.path NOT LIKE '%/Cache%'
+    AND p0.path NOT LIKE '%/Library/%'
+    AND p0.path NOT LIKE '%/.%'
   )

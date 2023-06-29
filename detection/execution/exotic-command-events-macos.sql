@@ -11,6 +11,7 @@
 -- interval: 180
 SELECT -- Child
   pe.path AS p0_path,
+  pe.time AS p0_time,
   REGEX_MATCH (pe.path, '.*/(.*)', 1) AS p0_name,
   TRIM(pe.cmdline) AS p0_cmd,
   pe.cwd AS p0_cwd,
@@ -101,7 +102,6 @@ WHERE
     OR p0_cmd LIKE '%chrome%-load-extension%' -- Known attack scripts
     OR p0_name LIKE '%pwn%'
     OR p0_name LIKE '%attack%' -- Unusual behaviors
-    OR p0_cmd LIKE '%powershell%'
     OR p0_cmd LIKE '%chattr -i%'
     OR p0_cmd LIKE '%dd if=/dev/%'
     OR p0_cmd LIKE '%cat /dev/null >%'
@@ -143,7 +143,7 @@ WHERE
       AND NOT p1_name IN ('sh', 'java')
       AND NOT p1_cmd LIKE "%pipenv shell"
     )
-    OR p0_cmd LIKE '%socat%'
+    OR p0_cmd LIKE 'socat %'
     OR p0_cmd LIKE '%SOCK_STREAM%'
     OR INSTR(p0_cmd, 'Socket.') > 0
   ) -- Things that could reasonably happen at boot.
@@ -165,11 +165,15 @@ WHERE
       '/bin/launchctl bootout system/com.docker.socket',
       '/bin/rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress',
       'git history',
+      'dd if=/dev/urandom bs=15 count=1 status=none',
+      'launchctl bootout gui/501/com.grammarly.ProjectLlama.UninstallAgent',
       'helm history',
       '/Library/Apple/System/Library/StagedFrameworks/Safari/SafariShared.framework/XPCServices/com.apple.Safari.History.xpc/Contents/MacOS/com.apple.Safari.History',
       'nc -h',
       'nc -uv 8.8.8.8 53',
+      'nc localhost 8080 -vz',
       'nix profile history',
+      'dd if=/dev/stdin conv=unblock cbs=79',
       'rm -f /tmp/mysql.sock',
       'sh -c launchctl bootout system "/Library/LaunchDaemons/com.ecamm.EcammAudioXPCHelper.plist"',
       '/usr/bin/csrutil report',
@@ -196,3 +200,4 @@ WHERE
   AND NOT p0_cmd LIKE '%find /Applications/LogiTuneInstaller.app -type d -exec chmod 777 {}%'
   AND NOT p0_cmd LIKE '/bin/rm -f /tmp/com.adobe.%.updater/%'
   AND NOT p0_name IN ('cc1', 'compile')
+  AND NOT exception_key IN ('dd,500,zsh,login', 'git,500,zsh,goland')

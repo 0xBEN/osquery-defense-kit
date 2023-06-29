@@ -1,6 +1,5 @@
 -- Find processes that run with a lower effective UID than their parent (event-based)
 --
---
 -- references:
 --   * https://attack.mitre.org/techniques/T1548/001/ (Setuid and Setgid)
 --   * https://cybersecurity.att.com/blogs/labs-research/shikitega-new-stealthy-malware-targeting-linux
@@ -8,16 +7,21 @@
 -- related:
 --   * unexpected-privilege-escalation.sql
 --
--- tags: events process escalation
+-- False positives:
+--   * On some hosts this ocassionally gets the parenting relationship confused
+--
+-- tags: events process escalation disabled
 -- platform: linux
 -- interval: 600
 SELECT
   file.mode AS p0_binary_mode,
   -- Child
   pe.path AS p0_path,
+  pe.time AS p0_time,
   REGEX_MATCH (pe.path, '.*/(.*)', 1) AS p0_name,
   TRIM(pe.cmdline) AS p0_cmd,
   pe.cwd AS p0_cwd,
+  pe.uid AS p0_uid,
   pe.euid AS p0_euid,
   pe.pid AS p0_pid,
   p.cgroup_path AS p0_cgroup,
@@ -87,21 +91,23 @@ WHERE
   )
   AND pe.path NOT IN (
     '/bin/ps',
+    '/opt/1Password/1Password-KeyringHelper',
     '/usr/bin/doas',
+    '/usr/bin/su',
     '/usr/bin/fusermount',
     '/usr/bin/fusermount3',
-    '/usr/bin/login',
-    '/usr/bin/i3lock',
-    '/usr/bin/sudo',
-    '/usr/bin/nvidia-modprobe',
-    '/usr/bin/unix_chkpwd',
-    '/usr/bin/gpgsm',
-    '/usr/bin/gpgconf',
     '/usr/bin/gpg',
+    '/usr/bin/gpgconf',
+    '/usr/bin/gpgsm',
+    '/usr/bin/i3lock',
+    '/usr/bin/login',
+    '/usr/bin/nvidia-modprobe',
+    '/usr/bin/sudo',
     '/usr/bin/top',
+    '/usr/bin/unix_chkpwd',
+    '/usr/lib/slack/chrome-sandbox',
     '/usr/lib/snapd/snap-confine',
     '/usr/lib/snapd/snap-update-ns',
-    '/opt/1Password/1Password-KeyringHelper',
     '/usr/lib/systemd/systemd',
     '/usr/lib/Xorg.wrap',
     '/usr/lib/xorg/Xorg.wrap'
@@ -114,10 +120,12 @@ WHERE
     '/usr/lib/systemd/systemd --user',
     '/bin/sh -c /usr/bin/pkexec /usr/share/apport/apport-gtk'
   )
+  AND NOT p0_cmd = '/usr/bin/pkexec /usr/lib/update-notifier/package-system-locked'
   AND NOT (
     p0_name = 'polkit-agent-helper-1'
     AND p1_path IN (
       '/usr/bin/gnome-shell',
+      '/usr/lib/gvfsd',
       '/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1'
     )
   )
@@ -128,6 +136,10 @@ WHERE
   AND NOT (
     p0_name IN ('dash', 'pkexec')
     AND p1_path = '/usr/bin/update-notifier'
+  ) -- A bizarro persistent false-positive from an Arch linux host
+  AND NOT (
+    p.cgroup_path = "/init.scope"
+    AND p1.cgroup_path != "/init.scope"
   )
   AND NOT p.cgroup_path LIKE '/system.slice/docker-%'
   AND NOT p1.cgroup_path LIKE '/system.slice/docker-%'

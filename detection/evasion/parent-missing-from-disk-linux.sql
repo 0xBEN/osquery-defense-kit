@@ -49,27 +49,35 @@ WHERE
   AND NOT p0.pid IN (1, 2)
   AND NOT p1.pid IN (1, 2) -- launchd, kthreadd
   AND NOT p1.path IN (
+    '/opt/brave.com/brave/brave',
     '/opt/google/chrome/chrome',
     '/usr/bin/alacritty',
     '/usr/bin/doas',
-    '/usr/libexec/gdm-x-session',
     '/usr/bin/dockerd',
     '/usr/bin/fusermount3',
+    '/usr/libexec/at-spi-bus-launcher',
     '/usr/bin/gnome-shell',
-    '/usr/sbin/sshd',
-    'usr/sbin/auditd',
-    '/usr/bin/tmux',
-    '/usr/share/code/code',
-    '/usr/libexec/gdm-wayland-session',
+    '/usr/bin/ibus-daemon',
+    '/usr/bin/kitty',
     '/usr/bin/osqueryd',
     '/usr/bin/sudo',
+    '/usr/bin/tmux',
     '/usr/bin/yay',
+    '/usr/libexec/gdm-wayland-session',
+    '/usr/libexec/gdm-x-session',
     '/usr/libexec/gnome-terminal-server',
-    '/usr/lib/systemd/systemd'
+    '/usr/lib/gnome-session-binary',
+    '/usr/lib/systemd/systemd',
+    '/usr/lib/xdg-document-portal',
+    '/usr/sbin/auditd',
+    '/usr/sbin/gdm3',
+    '/usr/sbin/sshd',
+    '/usr/share/code/code'
   ) -- long-running launchers
   AND NOT p1.name IN (
     'lightdm',
     'nvim',
+    'sh',
     'gnome-shell',
     'fish',
     'bash',

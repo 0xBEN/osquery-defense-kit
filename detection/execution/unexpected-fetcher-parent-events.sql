@@ -13,6 +13,7 @@ SELECT
   TRIM(pe.cmdline) AS p0_cmd,
   pe.cwd AS p0_cwd,
   pe.pid AS p0_pid,
+  pe.time AS p0_time,
   pe.euid AS p0_euid,
   p.cgroup_path AS p0_cgroup,
   -- Parent
@@ -76,6 +77,7 @@ WHERE
     'curl,500,bash,zsh',
     'curl,500,env,env',
     'curl,500,fish,gnome-terminal-',
+    'curl,500,bash,yay',
     'curl,500,ruby,zsh',
     'curl,500,ShellLauncher,',
     'curl,500,ShellLauncher,login',

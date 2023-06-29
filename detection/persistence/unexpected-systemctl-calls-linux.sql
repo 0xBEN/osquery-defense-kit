@@ -11,6 +11,7 @@ SELECT -- Child
   REGEX_MATCH (pe.path, '.*/(.*)', 1) AS p0_name,
   TRIM(pe.cmdline) AS p0_cmd,
   pe.cwd AS p0_cwd,
+  pe.time AS p0_time,
   pe.pid AS p0_pid,
   p.cgroup_path AS p0_cgroup,
   -- Parent
@@ -71,6 +72,7 @@ WHERE
   AND NOT exception_key IN (
     'systemctl,0,apt-helper,',
     'systemctl,0,,containerd-shim-runc-v2',
+    'systemctl,0,kubeadm,containerd-shim-runc-v2',
     'systemctl,0,dash,logrotate',
     'systemctl,0,pacman,pacman',
     'systemctl,500,zsh,tmux',
@@ -87,8 +89,11 @@ WHERE
     '/bin/systemctl -q is-enabled whoopsie.path',
     '/bin/systemctl --quiet is-enabled whoopsie.path',
     '/bin/systemctl stop --no-block nvidia-persistenced',
+    'systemctl --system daemon-reexec',
     '/sbin/runlevel',
     'systemctl is-active systemd-resolved.service',
+    'systemctl restart reflector.service',
+    'systemctl stop libvirtd.service',
     'systemctl is-enabled power-profiles-daemon.service',
     'systemctl is-enabled snapd.apparmor',
     'systemctl is-enabled systemd-rfkill.service',

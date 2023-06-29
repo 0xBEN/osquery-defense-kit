@@ -94,6 +94,7 @@ WHERE
     'pqrs.org',
     'prusa3d.com',
     'remarkable.com',
+    'rewind.ai',
     'securew2.com',
     'signal.org',
     'skype.com',
@@ -106,8 +107,10 @@ WHERE
     'ubuntu.com',
     'umd.edu',
     'usa.canon.com',
+    'uubyte.com',
     'vc.logitech.com',
     'virtualbox.org',
+    'vmware.com',
     'warp.dev',
     'webex.com',
     'whatsapp.com',
@@ -116,11 +119,16 @@ WHERE
     'zoom.us',
     'zsa.io'
   )
+  -- NOTE: Do not put all of storage.googleapis.com or similarly generic hosts here
   AND host NOT IN (
+    'arc.net',
+    'adoptium.net',
     'balsamiq.com',
     'brave.com',
+    'cron.com',
     'discord.com',
     'dl.discordapp.net',
+    'flipperzero.one',
     'dl.google.com',
     'duckduckgo.com',
     'dygma.com',
@@ -136,6 +144,7 @@ WHERE
     'obsproject.com',
     'posit.co',
     'proton.me',
+    'mnvoip.mm.fcix.net',
     'rancherdesktop.io',
     'rectangleapp.com',
     'stclairsoft.s3.amazonaws.com',
@@ -170,5 +179,6 @@ WHERE
       OR file.filename LIKE '%WhatsApp.dmg'
     )
   )
+  AND ea.value NOT LIKE 'https://storage.googleapis.com/copilot-mac-releases/%'
 GROUP BY
   ea.value

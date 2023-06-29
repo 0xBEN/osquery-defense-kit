@@ -7,7 +7,7 @@
 -- related:
 --   * unexpected-privilege-escalation.sql
 --
--- tags: events process escalation
+-- tags: events process escalation disabled
 -- platform: darwin
 -- interval: 300
 SELECT -- Child
@@ -16,6 +16,7 @@ SELECT -- Child
   TRIM(pe.cmdline) AS p0_cmd,
   pe.cwd AS p0_cwd,
   pe.pid AS p0_pid,
+  pe.uid AS p0_uid,
   pe.euid AS p0_euid,
   s.authority AS p0_authority,
   -- Parent
@@ -53,7 +54,8 @@ SELECT -- Child
     '.*/(.*)',
     1
   ) AS exception_key
-FROM process_events pe,
+FROM
+  process_events pe,
   uptime
   LEFT JOIN processes p ON pe.pid = p.pid
   LEFT JOIN signature s ON pe.path = s.path -- Parents (via two paths)
@@ -77,32 +79,53 @@ FROM process_events pe,
   LEFT JOIN signature p1_p2_sig ON p1_p2.path = p1_p2_sig.path
   LEFT JOIN signature pe1_p2_sig ON pe1_p2.path = pe1_p2_sig.path
   LEFT JOIN signature pe1_pe2_sig ON pe1_pe2.path = pe1_pe2_sig.path
-WHERE pe.time > (strftime('%s', 'now') -300)
+WHERE
+  pe.time > (strftime('%s', 'now') -300)
   AND p0_euid < p1_euid
   AND pe.status = 0
   AND pe.parent > 0
   AND pe.cmdline != ''
   AND pe.cmdline IS NOT NULL
   AND p1_path NOT IN (
+    '/Applications/LogiTune.app/Contents/MacOS/LogiTune',
     '/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared',
-    '/usr/libexec/PerfPowerServicesExtended',
     '/System/Library/PrivateFrameworks/AOSKit.framework/Versions/A/XPCServices/com.apple.iCloudHelper.xpc/Contents/MacOS/com.apple.iCloudHelper',
+    '/Library/Apple/System/Library/CoreServices/XProtect.app/Contents/XPCServices/XProtectPluginService.xpc/Contents/MacOS/XProtectPluginService',
     '/usr/bin/login',
     '/usr/bin/su',
     '/usr/bin/sudo',
     '/usr/libexec/mdmclient',
+    '/usr/libexec/PerfPowerServicesExtended',
     '/usr/local/bin/doas'
   ) -- Exclude weird bad data we've seen due to badly recorded macOS parent/child relationships, fixable by reboot
   AND NOT p0_cmd IN (
     '/usr/sbin/cupsd -l',
     '/usr/sbin/cfprefsd agent',
+    '/usr/libexec/wifip2pd',
+    '/System/Library/CoreServices/iconservicesd',
+    '/System/Library/PrivateFrameworks/InstallCoordination.framework/Support/installcoordinationd',
+    '/System/Library/PrivateFrameworks/CoreSymbolication.framework/coresymbolicationd',
     '/usr/libexec/PerfPowerServicesExtended',
     '/usr/libexec/mdmclient daemon',
     '/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared'
   )
   AND NOT exception_key IN (
+    'amfid,0,com.docker.backend,Docker',
+    'biometrickitd,0,LogiTune,launchd',
+    'bioutil,0,callservicesd,launchd',
+    'com.apple.geod,0,fmfd,launchd',
+    'trustd,205,trustd,launchd',
+    'CAReportingService,0,LogiTune,launchd',
+    'efilogin-helper,0,containermanagerd,launchd',
+    'com.apple.AccountPolicyHelper,0,LogiTune,launchd',
+    'com.apple.geod,262,com.docker.backend,Docker',
+    'com.apple.WebKit.WebContent,200,zsh,Emacs-arm64-11',
     'containermanagerd,262,com.docker.backend,Docker',
-    'SCHelper,0,com.docker.backend,Docker'
+    'dprivacyd,0,com.docker.backend,Docker',
+    'SCHelper,0,com.docker.backend,Docker',
+    'suhelperd,0,LogiTune,launchd',
+    'sysextd,0,LogiTune,launchd',
+    'system_profiler,0,callservicesd,launchd'
   )
   AND NOT (
     pe.euid = 262 -- core media helper id

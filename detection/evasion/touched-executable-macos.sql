@@ -36,7 +36,21 @@ FROM
   LEFT JOIN hash ON p.path = hash.path
   LEFT JOIN signature ON p.path = signature.path
 WHERE
-  f.btime == f.mtime
+  p.pid IN (
+        SELECT pid
+        FROM processes
+        WHERE path NOT LIKE '/System/%'
+        AND path NOT LIKE '/Library/Apple/%'
+        AND path NOT LIKE '/usr/libexec/%'
+        AND path NOT LIKE '/usr/sbin/%'
+        AND path NOT LIKE '/sbin/%'
+        AND path NOT LIKE '/private/var/db/com.apple.xpc.roleaccountd.staging/%'
+        AND path NOT LIKE '/usr/bin/%'
+        AND path NOT LIKE '/usr/local/kolide-k2/bin/osqueryd-updates/%/osqueryd'
+        AND path NOT LIKE '/usr/local/kolide-k2/bin/launcher-updates/%/Kolide.app/Contents/MacOS/launcher'
+  )
+
+  AND f.btime == f.mtime
   AND (
     -- change time is older than birth time
     btime_ctime_days_diff > 0 -- change time is older than birth time, but not 1970
@@ -79,11 +93,12 @@ WHERE
     p.euid > 500
     AND (
       p.path IN (
+        '/Applications/Canon Utilities/IJ Scan Utility/Canon IJ Scan Utility Lite.app/Contents/Library/LoginItems/CIJSULAgent.app/Contents/MacOS/CIJSULAgent',
+        '/Applications/Canon Utilities/Inkjet Extended Survey Program/Inkjet Extended Survey Program.app/Contents/MacOS/ESPController.app/Contents/Library/LoginItems/CanonIJExtendedSurveyLaunchAgent.app/Contents/MacOS/CanonIJExtendedSurveyLaunchAgent',
         '/Applications/Divvy.app/Contents/MacOS/Divvy',
         '/Applications/Sourcetree.app/Contents/MacOS/Sourcetree',
         '/Library/CoreMediaIO/Plug-Ins/DAL/LogiCapture.plugin/Contents/MacOS/Assistant',
-        '/Applications/Canon Utilities/IJ Scan Utility/Canon IJ Scan Utility Lite.app/Contents/Library/LoginItems/CIJSULAgent.app/Contents/MacOS/CIJSULAgent',
-        '/Applications/Canon Utilities/Inkjet Extended Survey Program/Inkjet Extended Survey Program.app/Contents/MacOS/ESPController.app/Contents/Library/LoginItems/CanonIJExtendedSurveyLaunchAgent.app/Contents/MacOS/CanonIJExtendedSurveyLaunchAgent'
+        '/Library/Printers/Brother/Utilities/BrStatusMonitor.app/Contents/MacOS/BrStatusMonitor'
       )
       OR p.path LIKE '/Users/%/Library/Application Support/com.elgato.StreamDeck/Plugins/%'
       OR p.path LIKE '/private/var/folders/%/T/AppTranslocation/%/Contents/MacOS/%'

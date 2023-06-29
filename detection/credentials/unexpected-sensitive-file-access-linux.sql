@@ -15,6 +15,7 @@ SELECT
   f.uid AS file_uid,
   p.cwd AS cwd,
   p.euid,
+  p.start_time,
   p.uid AS process_uid,
   p.name AS program_name,
   p.cmdline AS cmdline,
@@ -73,6 +74,7 @@ WHERE
     OR pof.path LIKE '/home/%/.config/mozilla/firefox%'
     OR pof.path LIKE '/home/%/.aws%'
   )
+  AND NOT p.cmdline LIKE 'less %id_rsa.pub'
   AND NOT (
     file_uid == process_uid
     AND exception_key IN (

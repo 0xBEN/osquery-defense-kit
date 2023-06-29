@@ -11,10 +11,11 @@ SELECT
   ea.value AS url
 FROM
   mdfind
-  LEFT JOIN file ON mdfind.path = file.path
-  LEFT JOIN users u ON file.uid = u.uid
+  JOIN file ON mdfind.path = file.path
+  JOIN users u ON file.uid = u.uid
   LEFT JOIN hash ON mdfind.path = hash.path
-  LEFT JOIN extended_attributes ea ON mdfind.path = ea.path AND ea.key = 'where_from'
+  LEFT JOIN extended_attributes ea ON mdfind.path = ea.path
+  AND ea.key = 'where_from'
   LEFT JOIN magic ON mdfind.path = magic.path
   LEFT JOIN signature ON mdfind.path = signature.path
 WHERE
@@ -29,5 +30,7 @@ WHERE
     REPLACE(LOWER(TRIM(description)), " ", "-")
   ) == 1
   -- Common filenames that are non-controversial
-
-GROUP BY file.path
+  AND NOT file.filename LIKE '%example.com%'
+  AND NOT file.path LIKE "%/testdata/%"
+GROUP BY
+  file.path

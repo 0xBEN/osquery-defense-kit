@@ -1,7 +1,8 @@
--- Unexpected calls to sysctl (event-based)
+-- Unexpected calls to macOS system utilities (event-based)
 --
 -- refs:
 --   * https://attack.mitre.org/techniques/T1497/001/ (Virtualization/Sandbox Evasion: System Checks)
+--   * https://www.sentinelone.com/blog/atomic-stealer-threat-actor-spawns-second-variant-of-macos-malware-sold-on-telegram/
 --
 -- platform: darwin
 -- interval: 900
@@ -11,6 +12,7 @@ SELECT
   REGEX_MATCH (pe.path, '.*/(.*)', 1) AS p0_name,
   TRIM(pe.cmdline) AS p0_cmd,
   pe.cwd AS p0_cwd,
+  pe.time AS p0_time,
   pe.pid AS p0_pid,
   pe.euid AS p0_euid,
   s.authority AS p0_authority,
@@ -72,14 +74,16 @@ WHERE
   AND pe.cmdline IS NOT NULL
   AND pe.status == 0
   AND pe.path IN (
-    '/usr/sbin/sysctl',
-    '/usr/libexec/security_authtrampoline',
-    '/usr/bin/openssl',
-    '/usr/bin/uuidgen',
+    '/usr/bin/dscl',
     '/usr/bin/funzip',
-    '/usr/sbin/ioreg',
+    '/usr/bin/openssl',
+    '/usr/bin/security',
     '/usr/bin/sqlite3',
-    '/usr/bin/sw_vers'
+    '/usr/bin/sw_vers',
+    '/usr/bin/uuidgen',
+    '/usr/libexec/security_authtrampoline',
+    '/usr/sbin/ioreg',
+    '/usr/sbin/sysctl'
   )
   AND p.parent > 0
   AND NOT p0_cmd IN (
@@ -93,7 +97,8 @@ WHERE
   )
   AND NOT p0_cmd LIKE '/usr/libexec/security_authtrampoline /Library/Application Support/Adobe/Adobe Desktop Common/ElevationManager/Adobe Installer auth%'
   AND NOT p1_path IN (
-    '/Applications/LogiTune.app/Contents/MacOS/LogiTune'
+    '/Applications/LogiTune.app/Contents/MacOS/LogiTune',
+    '/Applications/Alfred 5.app/Contents/Preferences/Alfred Preferences.app/Contents/MacOS/Alfred Preferences'
   )
 GROUP BY
   pe.pid

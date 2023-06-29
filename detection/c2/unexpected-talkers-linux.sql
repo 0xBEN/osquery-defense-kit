@@ -66,6 +66,7 @@ WHERE
   AND s.remote_address NOT LIKE 'fe80:%'
   AND s.remote_address NOT LIKE '127.%'
   AND s.remote_address NOT LIKE '192.168.%'
+  AND s.remote_address NOT LIKE '100.7%'
   AND s.remote_address NOT LIKE '172.1%'
   AND s.remote_address NOT LIKE '172.2%'
   AND s.remote_address NOT LIKE '172.30.%'
@@ -103,6 +104,7 @@ WHERE
     '32768,17,500,traceroute,0u,0g,traceroute',
     '32768,6,0,tailscaled,0u,0g,tailscaled',
     '32768,6,500,ssh,0u,0g,ssh',
+    '3306,6,500,java,u,g,java',
     '3307,6,500,cloud_sql_proxy,0u,0g,cloud_sql_proxy',
     '3443,6,500,chrome,0u,0g,chrome',
     '3478,6,500,chrome,0u,0g,chrome',
@@ -111,6 +113,7 @@ WHERE
     '4070,6,500,spotify,500u,500g,spotify',
     '4070,6,500,spotify,u,g,spotify',
     '43,6,500,whois,0u,0g,whois',
+    '43,6,500,whois.md,0u,0g,whois',
     '444,6,500,firefox,0u,0g,firefox',
     '4460,6,114,chronyd,0u,0g,chronyd',
     '465,6,500,thunderbird,0u,0g,thunderbird',
@@ -144,12 +147,15 @@ WHERE
     '80,6,0,NetworkManager,0u,0g,NetworkManager',
     '80,6,0,packagekitd,0u,0g,packagekitd',
     '80,6,0,pacman,0u,0g,pacman',
+    '80,6,0,pdftex,0u,0g,pdftex',
     '80,6,0,python3.10,0u,0g,dnf',
     '80,6,0,python3.10,0u,0g,dnf-automatic',
     '80,6,0,python3.10,0u,0g,yum',
     '80,6,0,python3.11,0u,0g,dnf',
+    '80,6,0,python3.11,0u,0g,dnf-automatic',
     '80,6,0,python3.11,0u,0g,yum',
     '80,6,0,python3.9,u,g,yum',
+    '80,6,0,sort,0u,0g,sort',
     '80,6,0,systemd-hwdb,0u,0g,systemd-hwdb',
     '80,6,0,tailscaled,0u,0g,tailscaled',
     '80,6,0,.tailscaled-wrapped,0u,0g,.tailscaled-wra',
@@ -163,13 +169,19 @@ WHERE
     '80,6,500,brave,0u,0g,brave',
     '80,6,500,chrome,0u,0g,chrome',
     '80,6,500,cloud_sql_proxy,0u,0g,cloud_sql_proxy',
+    '80,6,500,copilot-agent-linux,500u,500g,copilot-agent-l',
     '80,6,500,curl,0u,0g,curl',
     '80,6,500,electron,0u,0g,electron',
     '80,6,500,firefox,0u,0g,firefox',
     '80,6,500,firefox,0u,0g,.firefox-wrappe',
+    '80,6,500,firefox-bin,u,g,firefox-bin',
+    '80,6,500,git-remote-http,0u,0g,git-remote-http',
     '80,6,500,gnome-software,0u,0g,gnome-software',
+    '80,6,500,java,0u,0g,java',
+    '80,6,500,java,u,g,java',
     '80,6,500,main,500u,500g,main',
     '80,6,500,mconvert,500u,500g,mconvert',
+    '80,6,500,mediawriter,u,g,mediawriter',
     '80,6,500,melange,500u,500g,melange',
     '80,6,500,obs-browser-page,u,g,obs-browser-pag',
     '80,6,500,pacman,0u,0g,pacman',
@@ -184,6 +196,7 @@ WHERE
     '80,6,500,slack,0u,0g,slack',
     '80,6,500,slirp4netns,500u,500g,slirp4netns',
     '80,6,500,spotify,0u,0g,spotify',
+    '80,6,500,spotify,500u,500g,spotify',
     '80,6,500,spotify-launcher,0u,0g,spotify-launche',
     '80,6,500,spotify,u,g,spotify',
     '80,6,500,steam,500u,100g,steam',
@@ -207,14 +220,14 @@ WHERE
     '8801,17,500,zoom,0u,0g,zoom',
     '8801,17,500,zoom.real,u,g,zoom.real',
     '88,6,500,syncthing,0u,0g,syncthing',
+    '8987,6,500,whois,0u,0g,whois',
     '9418,6,500,git,0u,0g,git',
     '993,6,500,evolution,0u,0g,evolution',
     '993,6,500,thunderbird,0u,0g,thunderbird',
     '993,6,500,thunderbird,u,g,thunderbird',
     '9999,6,500,firefox,0u,0g,firefox'
-
   )
-  AND NOT exception_key LIKE '80,6,500,ZwiftAppMetal,ZwiftAppMetal-%,'
+  AND NOT exception_key LIKE '80,6,500,terraform_1.1.5,500u,500g,terraform'
   AND NOT (
     p.name = 'java'
     AND p.cmdline LIKE '/home/%/.local/share/JetBrains/Toolbox/%'
@@ -233,20 +246,13 @@ WHERE
     p.name = 'chrome'
     AND f.filename = 'chrome'
     AND s.remote_port > 1024
-    AND s.protocol = 6
+    AND s.protocol IN (6, 17)
     AND p.euid > 500
   )
   AND NOT (
     p.name = 'steam'
     AND f.filename = 'steam'
     AND s.remote_port > 27000
-    AND s.protocol = 6
-    AND p.euid > 500
-  )
-  AND NOT (
-    p.name = 'chrome'
-    AND f.filename = 'chrome'
-    AND s.remote_port > 3000
     AND s.protocol = 6
     AND p.euid > 500
   )
@@ -267,6 +273,12 @@ WHERE
   AND NOT (
     exception_key = '32768,6,500,ssh,0u,0g,ssh'
     AND s.remote_port = 40022
+  )
+  -- Qualys
+  AND NOT (
+    exception_key = '80,6,0,curl,0u,0g,curl'
+    AND p.cgroup_path = '/system.slice/qualys-cloud-agent.service'
+    AND child_cmd LIKE ' curl -sS -H Metadata:true http://169.254.169.254/metadata/instance%'
   )
   AND NOT (
     s.remote_port = 80
