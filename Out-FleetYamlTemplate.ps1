@@ -8,7 +8,7 @@ if (-not (Get-Module -ListAvailable -Name 'powershell-yaml')) {
 
 # Check if we're running in the root of the repo
 $checkPwd = git remote get-url --all origin 2>/dev/null
-if (($checkPwd -notlike 'https://github.com/*/osquery-defense-kit') -or (-not (Get-ChildItem $PWD -Hidden -Directory -Name '.git'))) {
+if (($checkPwd -notlike 'https://github.com/*/osquery-defense-kit' -and $checkPwd -notlike 'https://github.com/*/osquery-defense-kit.git') -or (-not (Get-ChildItem $PWD -Hidden -Directory -Name '.git'))) {
     throw "Please run this script in the root of the repository."
 }
 
