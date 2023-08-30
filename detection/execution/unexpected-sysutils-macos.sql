@@ -7,6 +7,11 @@
 -- platform: darwin
 -- interval: 900
 SELECT
+  REGEX_MATCH (pe.path, '.*/(.*)', 1) || ',' || MIN(pe.euid, 500) || ',' || REGEX_MATCH (COALESCE(p1.path, pe1.path), '.*/(.*)', 1) || ',' || REGEX_MATCH (
+    COALESCE(p1_p2.path, pe1_p2.path, pe1_pe2.path),
+    '.*/(.*)',
+    1
+  ) AS exception_key,
   -- Child
   pe.path AS p0_path,
   REGEX_MATCH (pe.path, '.*/(.*)', 1) AS p0_name,
@@ -74,16 +79,21 @@ WHERE
   AND pe.cmdline IS NOT NULL
   AND pe.status == 0
   AND pe.path IN (
+    '/usr/bin/csrutil',
+    '/usr/bin/ditto',
     '/usr/bin/dscl',
     '/usr/bin/funzip',
     '/usr/bin/openssl',
     '/usr/bin/security',
     '/usr/bin/sqlite3',
     '/usr/bin/sw_vers',
+    '/usr/bin/unzip',
     '/usr/bin/uuidgen',
+    '/usr/bin/whoami',
     '/usr/libexec/security_authtrampoline',
     '/usr/sbin/ioreg',
-    '/usr/sbin/sysctl'
+    '/usr/sbin/sysctl',
+    '/usr/sbin/system_profiler'
   )
   AND p.parent > 0
   AND NOT p0_cmd IN (
@@ -95,7 +105,14 @@ WHERE
     '/usr/sbin/sysctl -n hw.cputype',
     '/usr/sbin/sysctl sysctl.proc_translated'
   )
+  AND NOT exception_key IN (
+    'system_profiler,500,Google Drive,launchd',
+    'system_profiler,500,bash,launchd',
+    'system_profiler,500,bash,logioptionsplus_agent',
+    'system_profiler,0,launcher,launchd'
+  )
   AND NOT p0_cmd LIKE '/usr/libexec/security_authtrampoline /Library/Application Support/Adobe/Adobe Desktop Common/ElevationManager/Adobe Installer auth%'
+  AND NOT p0_cmd LIKE '%sqlite3%vulnerability.db%'
   AND NOT p1_path IN (
     '/Applications/LogiTune.app/Contents/MacOS/LogiTune',
     '/Applications/Alfred 5.app/Contents/Preferences/Alfred Preferences.app/Contents/MacOS/Alfred Preferences'

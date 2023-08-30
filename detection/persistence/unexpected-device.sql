@@ -50,6 +50,7 @@ WHERE
     OR directory LIKE '/dev/%'
   )
   AND path_expr NOT IN (
+    '/dev/HID-SENSOR-e..auto',
     '/dev/acpi_thermal_rel',
     '/dev/autofs',
     '/dev/block/',
@@ -66,8 +67,8 @@ WHERE
     '/dev/console',
     '/dev/core',
     '/dev/cpu/',
-    '/dev/cpu_dma_latency',
     '/dev/cpu/microcode',
+    '/dev/cpu_dma_latency',
     '/dev/cros_ec',
     '/dev/cuse',
     '/dev/disk/',
@@ -95,7 +96,6 @@ WHERE
     '/dev/fuse',
     '/dev/gpiochip',
     '/dev/hidraw',
-    '/dev/HID-SENSOR-e..auto',
     '/dev/hpet',
     '/dev/hugepages/',
     '/dev/hugepages/libvirt',
@@ -139,10 +139,10 @@ WHERE
     '/dev/nvidia',
     '/dev/nvidia-caps/',
     '/dev/nvidia-caps/nvidia-cap',
-    '/dev/nvidiactl',
     '/dev/nvidia-modeset',
     '/dev/nvidia-uvm',
     '/dev/nvidia-uvm-tools',
+    '/dev/nvidiactl',
     '/dev/nvme',
     '/dev/nvmen',
     '/dev/nvmenp',
@@ -170,6 +170,7 @@ WHERE
     '/dev/sgx_vepc',
     '/dev/shm/',
     '/dev/shm/i-log-',
+    '/dev/shm/jack_db-',
     '/dev/shm/libpod_lock',
     '/dev/shm/libpod_rootless_lock_',
     '/dev/shm/pulse-shm-',
@@ -192,9 +193,10 @@ WHERE
     '/dev/tpmrm',
     '/dev/tty',
     '/dev/ttyACM',
-    '/dev/ttyprintk',
     '/dev/ttyS',
     '/dev/ttyUSB',
+    '/dev/ttyprintk',
+    '/dev/ubuntu-vg/',
     '/dev/udmabuf',
     '/dev/uhid',
     '/dev/uinput',
@@ -215,13 +217,14 @@ WHERE
     '/dev/vfio/',
     '/dev/vfio/vfio',
     '/dev/vg/',
-    '/dev/vga_arbiter',
     '/dev/vg/root',
     '/dev/vg/swap',
+    '/dev/vga_arbiter',
     '/dev/vgubuntu/',
     '/dev/vgubuntu/root',
     '/dev/vgubuntu/swap_',
     '/dev/vhci',
+    '/dev/disk/by-dname',
     '/dev/vhost-net',
     '/dev/vhost-vsock',
     '/dev/video',
@@ -244,4 +247,5 @@ WHERE
   AND NOT path LIKE '/dev/mqueue/us.zoom.aom.%'
   AND NOT path LIKE '/dev/shm/aomshm.%'
   AND NOT path LIKE '/dev/shm/u%-Shm_%'
+  AND NOT path LIKE '/dev/shm/.com.google.Chrome.%'
   AND NOT path LIKE '/dev/shm/u%-ValveIPC%'

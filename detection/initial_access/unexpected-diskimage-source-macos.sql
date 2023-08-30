@@ -40,22 +40,24 @@ WHERE
     'adobe.com',
     'akmedia.digidesign.com',
     'alfredapp.com',
+    'amazon.com',
     'android.com',
     'apple.com',
     'arc.net',
+    'asana.com',
     'balena.io',
     'balsamiq.com',
     'brave.com',
+    'c-wss.com',
     'canon.co.uk',
     'cdn.mozilla.net',
     'charlesproxy.com',
     'cloudfront.net',
     'cron.com',
     'csclub.uwaterloo.ca',
-    'c-wss.com',
     'digidesign.com',
-    'discordapp.net',
     'discord.com',
+    'discordapp.net',
     'docker.com',
     'dogado.de',
     'download.prss.microsoft.com',
@@ -85,16 +87,18 @@ WHERE
     'mozilla.org',
     'mutedeck.com',
     'mysql.com',
-    'notion.so',
     'notion-static.com',
+    'notion.so',
     'ocf.berkeley.edu',
     'oobesaas.adobe.com',
+    'openra.net',
     'oracle.com',
     'osuosl.org',
     'pqrs.org',
     'prusa3d.com',
     'remarkable.com',
     'rewind.ai',
+    's3.amazonaws.com',
     'securew2.com',
     'signal.org',
     'skype.com',
@@ -115,15 +119,17 @@ WHERE
     'webex.com',
     'whatsapp.com',
     'xtom.com',
-    'zoomgov.com',
     'zoom.us',
+    'zoomgov.com',
     'zsa.io'
   )
   -- NOTE: Do not put all of storage.googleapis.com or similarly generic hosts here
   AND host NOT IN (
     'arc.net',
+    'presenting.app',
     'adoptium.net',
     'balsamiq.com',
+    'bearly.ai',
     'brave.com',
     'cron.com',
     'discord.com',
@@ -161,6 +167,7 @@ WHERE
   -- Yes, these are meant to be fairly broad.
   AND host NOT LIKE 'download%'
   AND host NOT LIKE 'cdn%'
+  AND host NOT LIKE '%.cdn.%.com'
   AND host NOT LIKE '%.edu'
   AND host NOT LIKE 'github-production-release-asset-%.s3.amazonaws.com'
   AND host NOT LIKE '%.org'

@@ -75,6 +75,7 @@ WHERE
       AND NOT path LIKE '/opt/homebrew/%'
       AND NOT path LIKE '/System/%'
       AND NOT path LIKE '/usr/local/kolide-k2/bin/%'
+      AND NOT path LIKE '%/cloud_sql_proxy'
   )
   AND (p0.start_time - MAX(f.ctime, f.btime)) < 60
   AND f.ctime > 0
@@ -127,6 +128,8 @@ WHERE
       OR f.path LIKE '%go-build%'
       OR f.path LIKE '~/%/src/%.test'
       OR f.path LIKE '~/%/pkg/%.test'
+      OR f.path LIKE '~/%/gopls'
+      OR f.path LIKE '~/go/%/bin'
       OR f.path LIKE '/private/tmp/%/Creative Cloud Installer.app/Contents/MacOS/Install'
       OR f.path LIKE '/private/tmp/go-%'
       OR f.path LIKE '/private/tmp/nix-build-%'
@@ -149,6 +152,7 @@ WHERE
     'Developer ID Application: Cisco (DE8Y96K9QP)',
     'Developer ID Application: CodeWeavers Inc. (9C6B7X7Z8E)',
     'Developer ID Application: Corsair Memory, Inc. (Y93VXCB8Q5)',
+    'Developer ID Application: Keybase, Inc. (99229SGT5K)',
     'Developer ID Application: Denver Technologies, Inc (2BBY89MBSN)',
     'Developer ID Application: Docker Inc (9BNSXJN65R)',
     'Developer ID Application: Dropbox, Inc. (G7HH3F8CAK)',
@@ -204,6 +208,10 @@ WHERE
     AND s.identifier = 'org.sparkle-project.Sparkle.Updater'
     AND s.authority != ''
     AND p0.uid > 499
+  )
+  AND NOT (
+    p0.path = '/Library/PrivilegedHelperTools/com.macpaw.CleanMyMac4.Agent'
+    AND s_auth = 'Developer ID Application: MacPaw Inc. (S8EX82NJP6)'
   )
 GROUP BY
   p0.pid

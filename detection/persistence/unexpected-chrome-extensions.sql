@@ -7,7 +7,8 @@
 --   * Almost unlimited: any extension that isn't on your whitelist
 --
 -- tags: persistent seldom browser
-SELECT name,
+SELECT
+  name,
   profile,
   chrome_extensions.description AS 'descr',
   persistent AS persists,
@@ -15,6 +16,8 @@ SELECT name,
   chrome_extensions.path,
   referenced AS in_config,
   file.ctime,
+  file.btime,
+  file.mtime,
   from_webstore AS in_store,
   TRIM(CAST(permissions AS text)) AS perms,
   state AS 'enabled',
@@ -28,11 +31,13 @@ SELECT name,
     identifier
   ) AS exception_key,
   hash.sha256
-FROM users
+FROM
+  users
   CROSS JOIN chrome_extensions USING (uid)
   LEFT JOIN file ON chrome_extensions.path = file.path
   LEFT JOIN hash ON chrome_extensions.path = hash.path
-WHERE state = 1
+WHERE
+  state = 1
   AND (
     (
       from_webstore != 'true'
@@ -61,23 +66,10 @@ WHERE state = 1
       OR perms LIKE "%nativeMessaging%"
       OR perms LIKE "%proxy%"
       OR perms LIKE "%webAuthenticationProxy%"
+      OR perms LIKE "%management%"
     )
   )
   AND NOT exception_key IN (
-    'false,AgileBits,1Password – Password Manager,dppgmdbiimibapkepcbdbmkaabgiofem',
-    'false,Anthony Feddersen - Chainguard, Inc.,Chainguard On-Call Chrome Extension,',
-    'false,,base64 encode or decode selected text,',
-    'false,,Edge relevant text changes,jmjflgjpcpepeafmmgdpfkogkghcpiha',
-    'false,,Google Chat,chfbpgnooceecdoohagngmjnndbbaeip',
-    'false,,Google Chat,mdpkiolbdkhdjpekfbkbmhigcaggjagi',
-    'false,,Google Cloud,gmdcbpephenfeelhagpbceidhdbobfpk',
-    'false,,Google Drive,aghbiahbpaijignceidepookljebhfak',
-    'false,,Google Photos,ncmjhecbjeaamljdfahankockkkdmedg',
-    'false,julienv3@gmail.com,treasure-clicker,',
-    'false,juverm@chainguard.dev,auto-close-gitsign,',
-    'false,,Sigstore close post-auth tabs,',
-    'false,,Trotto go links,nkeoojidblilnkcbbmfhaeebndapehjk',
-    'false,,YouTube,agimnkijcaahngcdmfeangaknmldooml',
     'true,,Acorns Earn,facncfnojagdpibmijfjdmhkklabakgd',
     'true,Adaware,Safe Torrent Scanner,aegnopegbbhjeeiganiajffnalhlkkjb',
     'true,,Adblock for Youtube™,cmedhionkhpnakcndndgjdbohmhepckk',
@@ -89,6 +81,7 @@ WHERE state = 1
     'true,Alexander Shutau,Dark Reader,eimadpbcbfnmbkopoojfekhnkhdbieeh',
     'true,All uBlock contributors,uBlock - free ad blocker,epcnnfbjfcgphgdmggkamkmgojdagdnn',
     'true,,Application Launcher For Drive (by Google),lmjegmlicamnimmfhcmpkclmigmmcbeh',
+    'true,,axe DevTools - Web Accessibility Testing,lhdoppojpmngadmnindnejefpokejbdd',
     'true,,Bardeen - automate manual work,ihhkmalpkhkoedlmcnilbbhhbhnicjga',
     'true,,Bardeen - automate workflows with one click,ihhkmalpkhkoedlmcnilbbhhbhnicjga',
     'true,Benjamin Hollis,JSONView,gmegofmjomhknnokphhckolhcffdaihd',
@@ -139,7 +132,9 @@ WHERE state = 1
     'true,,Facebook Pixel Helper,fdgfkebogiimcoedlicjlajpkdmockpc',
     'true,Federico Brigante,GitHub Issue Link Status,nbiddhncecgemgccalnoanpnenalmkic',
     'true,,FoxyProxy Basic,dookpfaalaaappcdneeahomimbllocnb',
+    'true,,Free Maps Ruler,ejpahoknghmacibohhgleeacndkglgmo',
     "true,Gareth Stephenson,My O'Reilly Downloader,deebiaolijlopiocielojiipnpnaldlk",
+    'true,Ghostery,Ghostery – Privacy Ad Blocker,mlomiejdfkolichcflejclcbmpeaniij',
     'true,,Github Absolute Dates,iepecohjelcmdnahbddleblfphbaheno',
     'true,,GitHub Red Alert,kmiekjkmkbhbnlempjkaombjjcfhdnfe',
     'true,,Google Analytics Parameter Stripper,jbgedkkfkohoehhkknnmlodlobbhafge',
@@ -151,6 +146,7 @@ WHERE state = 1
     'true,,Google Mail Checker,mihcahmgecmbnbcchbopgniflfhgnkff',
     'true,,Google Optimize,bhdplaindhdkiflmbfbciehdccfhegci',
     'true,,Google Play Books,mmimngoggfoobjdlefbcabngfnmieonb',
+    'true,,Grammarly: Grammar Checker and AI Writing App,kbfnbcaeplbcioakkpcpgfkobkghlhen',
     'true,,Grammarly: Grammar Checker and Writing App,kbfnbcaeplbcioakkpcpgfkobkghlhen',
     'true,,Gravit Designer,pdagghjnpkeagmlbilmjmclfhjeaapaa',
     'true,,GSConnect,jfnifeihccihocjbfcfhicmmgpjicaec',
@@ -159,6 +155,8 @@ WHERE state = 1
     'true,,Honey: Automatic Coupons & Rewards,bmnlcjabgnpnenekpadlanbbkooimhnj',
     'true,,HTTPS Everywhere,gcbommkclmclpchllfjekcdonpmejbdp',
     'true,https://metamask.io,MetaMask,nkbihfbeogaeaoehlefnkodbefgpgknn',
+    'true,,HubSpot Sales,oiiaigjnkhngdbnoookogelabohpglmd',
+    'true,,IBA Opt-out (by Google),gbiekjoijknlhijdjbaadobpkdhmoebb',
     'true,,iCloud Bookmarks,fkepacicchenbjecpbpbclokcabebhah',
     'true,,Instapaper,ldjkgaaoikpmhmkelcgkgacicjfbofhh',
     'true,James Anderson,LeechBlock NG,blaaajhemilngeeffpbfkdjjoefldkok',
@@ -189,6 +187,7 @@ WHERE state = 1
     'true,Opera Norway AS,Opera AI Prompts,mljbnbeedpkgakdchcmfapkjhfcogaoc',
     'true,Opera Software AS,Rich Hints Agent,enegjkbbakeegngfapepobipndnebkdk',
     'true,,Outbrain Pixel Tracker,daebadnaphbiobojnpgcenlkgpihmbdc',
+    'true,,Outreach Everywhere,chmpifjjfpeodjljjadlobceoiflhdid',
     'true,,Page Analytics (by Google),fnbdnhhicmebfgdgglcdacdapkcihcoh',
     'true,,Password Alert,noondiphcddnnabmjcihcjfbhfklnnep',
     'true,Pawel Psztyc,Advanced REST client,hgmloofddffdnphfgcellkdfbfbjeloo',
@@ -249,6 +248,7 @@ WHERE state = 1
     'true,,Vue.js devtools,nhdogjmejiglipccpnnnanhbledajbpd',
     'true,Wappalyzer,Wappalyzer - Technology profiler,gppongmhjkpfnbhagpmjfkannfbllamg',
     'true,,WAVE Evaluation Tool,jbbplnpkjmmeebjpijfedlgcdilocofh',
+    'true,,Wikiwand: Wikipedia Modernized,emffkefkbkpkgpdeeooapgaicgmcbolj',
     'true,,Windscribe - Free Proxy and Ad Blocker,hnmpcagpplmpfojmgmnngilcnanddlhb',
     'true,,Wisdolia,ciknpklcipibmfbgjmdmfdfalklfdlne',
     'true,,WiseStamp email signature,pbcgnkmbeodkmiijjfnliicelkjfcldg',
@@ -259,4 +259,9 @@ WHERE state = 1
     'true,,ZoomInfo Engage Chrome Extension,mnbjlpbmllanehlpbgilmbjgocpmcijp',
     'true,,Zoom Scheduler,kgjfgplpablkjnlkjmjdecgdpfankdle'
   )
-GROUP BY exception_key
+  AND NOT (
+    exception_key = 'false,AgileBits,1Password – Password Manager,dppgmdbiimibapkepcbdbmkaabgiofem'
+    AND chrome_extensions.path LIKE '%/Microsoft Edge/%'
+  )
+GROUP BY
+  exception_key

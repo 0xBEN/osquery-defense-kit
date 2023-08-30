@@ -40,19 +40,20 @@ WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-par
   child_name IN ('curl', 'wget', 'ftp', 'tftp') -- And not a regular local user
   AND NOT exception_key IN (
     'curl,0,09-timezone,nm-dispatcher',
-    'curl,0,sh,qualys-cloud-ag',
     'curl,0,build.sh,buildkit-runc',
+    'curl,0,eos-rankmirrors,eos-rankmirrors',
     'curl,0,nm-dispatcher,',
     'curl,0,nm-dispatcher,nm-dispatcher',
+    'curl,0,sh,qualys-cloud-ag',
+    'curl,0,sh,qualys-scan-uti',
     'curl,300,bash,nix',
     'curl,301,bash,nix',
     'curl,302,bash,nix',
     'curl,303,bash,nix',
     'curl,305,bash,nix',
-    'curl,500,nvim,nvim',
     'curl,307,bash,nix',
+    'curl,500,nwg-panel,systemd',
     'curl,500,bash,bash',
-    'curl,0,sh,qualys-scan-uti',
     'curl,500,bash,fakeroot',
     'curl,500,bash,fish',
     'curl,500,bash,nix-daemon',
@@ -60,10 +61,11 @@ WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-par
     'curl,500,bash,zsh',
     'curl,500,env,env',
     'curl,500,eos-connection-,eos-update-noti',
-    'curl,0,eos-rankmirrors,eos-rankmirrors',
     'curl,500,fish,gnome-terminal-',
     'curl,500,launchd,kernel_task',
     'curl,500,makepkg,yay',
+    'curl,500,node-cve-count.,bash',
+    'curl,500,nvim,nvim',
     'curl,500,ruby,zsh',
     'curl,500,ShellLauncher,',
     'curl,500,ShellLauncher,login',
@@ -94,7 +96,8 @@ WHERE -- NOTE: The remainder of this query is synced with unexpected-fetcher-par
   )
   AND NOT p.cmdline IN (
     'curl -s -6 https://api.serhiy.io/v1/stats/ip',
-    'curl -s -4 https://api.serhiy.io/v1/stats/ip'
+    'curl -s -4 https://api.serhiy.io/v1/stats/ip',
+    'curl https://wttr.in/?format=1 -s'
   )
   AND NOT parent_name IN ('yay')
   AND NOT p.cmdline LIKE 'curl -s https://support-sp.apple.com/sp/product%'

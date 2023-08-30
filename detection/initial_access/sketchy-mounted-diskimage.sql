@@ -66,6 +66,7 @@ WHERE
       AND signature.identifier != 'net.snowflake.snowsql'
       AND signature.authority NOT IN (
         'Developer ID Application: Allen Bai (97DN42T837)',
+        'Developer ID Application: BlueStack Systems, Inc. (QX5T8D6EDU)',
         'Developer ID Application: Galvanix (5BRAQAFB8B)'
       )
     ) -- Rule 2. App binaries that have mixed-caps names such as LYwjtu0sc3XqkNVbQe_gM4YiRpmgUpRIew or yWnBJLaF (AdobeFlashPlayer_567.app)
@@ -102,6 +103,7 @@ WHERE
       AND file.directory LIKE "/Volumes/%/Contents/MacOS"
       AND signature.authority NOT IN (
         "Developer ID Application: Logitech Inc. (QED4VVPZWA)",
+        "Developer ID Application: Bookry Ltd (4259LE8SU5)",
         "Developer ID Application: VideoLAN (75GAHG3SZQ)"
       )
     ) --   6. Volumes containing a hidden top-level folder or binary, such as yWnBJLaF (1302.app)
@@ -127,13 +129,17 @@ WHERE
     ) --   7. Volumes containing a top-level symlink to something other than /Applications, such as yWnBJLaF (1302.app)
     OR (
       file.symlink = 1
-      AND magic.data != 'symbolic link to /Applications'
-      AND magic.data != 'symbolic link to /Applications/'
-      AND magic.data != 'symbolic link to .'
+      AND magic.data NOT IN (
+        '/Library/Application Support/Apple/Safari/SafariForWebKitDevelopment',
+        'symbolic link to .',
+        'symbolic link to /Applications',
+        'symbolic link to /Applications/',
+        'symbolic link to ../Resources/public',
+        'symbolic link to steam_osx'
+      )
       -- emacs
-      AND magic.data != 'symbolic link to bin-x86%'
+      AND magic.data NOT LIKE 'symbolic link to bin-x86%'
       AND magic.data NOT LIKE 'symbolic link to /Users/%/My Drive'
-      AND magic.data NOT LIKE 'symbolic link to /Library/Application Support/Apple/Safari/SafariForWebKitDevelopment'
     )
   )
 GROUP BY

@@ -45,28 +45,33 @@ WHERE
       AND size > 0
   )
   AND NOT homedir IN (
+    '~/Library/Application Support/1Password',
     '~/Library/Application Support/Adobe',
     '~/Library/Application Support/Beeper',
-    '~/Library/Application Support/com.tinyapp.TablePlus',
-    '~/Library/Application Support/Jabra Direct',
-    '~/Library/Application Support/discord',
-    '~/Library/Application Support/Keybase',
-    ' ~/Library/Application Support/1Password',
-    '~/Library/Application Support/com.intelliscapesolutions.caffeine',
-    '~/Library/Application Support/com.psiexams.psi-bridge-secure-browser',
-    '~/Library/Application Support/GitHub Desktop',
-    '~/Library/Application Support/Loom',
-    '~/Library/Application Support/ZaloApp',
-    '~/Library/Application Support/ZaloPC',
-    '~/Library/Application Support/com.bohemiancoding.sketch3',
-    '~/Library/Application Support/DropboxElectron',
-    '~/Library/Application Support/Docker Desktop',
-    '~/Library/Application Support/Slack',
+    '~/Library/Application Support/BetterTouchTool',
+    '~/Library/Application Support/CleanMyMac X Menu',
+    '~/Library/Application Support/CleanMyMac X',
     '~/Library/Application Support/Code',
-    '~/Library/Application Support/lghub',
-    '~/Library/Application Support/com.operasoftware.Opera',
+    '~/Library/Application Support/Docker Desktop',
+    '~/Library/Application Support/DropboxElectron',
+    '~/Library/Application Support/GitHub Desktop',
+    '~/Library/Application Support/Jabra Direct',
+    '~/Library/Application Support/Keybase',
+    '~/Library/Application Support/Lens',
+    '~/Library/Application Support/Loom',
+    '~/Library/Application Support/Presenting',
+    '~/Library/Application Support/Slack',
+    '~/Library/Application Support/ZaloApp',
+    '~/Library/Application Support/ZaloData',
+    '~/Library/Application Support/ZaloPC',
     '~/Library/Application Support/com.apple.spotlight',
-    '~/Library/Application Support/Lens'
+    '~/Library/Application Support/com.bohemiancoding.sketch3',
+    '~/Library/Application Support/com.intelliscapesolutions.caffeine',
+    '~/Library/Application Support/com.operasoftware.Opera',
+    '~/Library/Application Support/com.psiexams.psi-bridge-secure-browser',
+    '~/Library/Application Support/com.tinyapp.TablePlus',
+    '~/Library/Application Support/discord',
+    '~/Library/Application Support/lghub'
   )
   AND NOT homepath IN (
     '~/Library/Application Support/.Shadowland5.5',
@@ -74,6 +79,7 @@ WHERE
     '~/Library/Application Support/.settings'
   )
   AND NOT homepath LIKE '~/Library/Application Support/.syssettings%'
+  AND NOT magic.data = 'XML 1.0 document, ASCII text'
   -- Capture One
   AND NOT (
     file.mode = "0666"

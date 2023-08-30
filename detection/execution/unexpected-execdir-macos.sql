@@ -99,15 +99,12 @@ WHERE
   )
   AND NOT homedir IN (
     '~/bin',
-    '~/code/bin',
-    '~/Downloads/google-cloud-sdk/bin',
-    '~/go/bin',
     '~/.cache/gitstatus',
+    '~/.gvm/binscripts',
     '~/.local/share/gh/extensions/gh-sbom',
-    '~/.local/bin',
-    '~/.magefile',
-    '~/projects/go/bin'
+    '~/.magefile'
   )
+  AND NOT homedir LIKE '~/%/bin'
   AND NOT top_homedir IN (
     '~/Applications/',
     '~/Applications (Parallels)/',
@@ -142,6 +139,7 @@ WHERE
     '/Library/Application Support/EcammLive',
     '~/Library/Caches/com.mimestream.Mimestream/',
     '~/Library/Caches/com.sempliva.Tiles/',
+    '~/Library/Services/UE4EditorServices.app/',
     '~/Library/Caches/JetBrains/',
     '~/Library/Caches/org.gpgtools.updater/',
     '~/Library/Caches/snyk/',
@@ -179,19 +177,21 @@ WHERE
     'Developer ID Application: Docker Inc (9BNSXJN65R)',
     'Developer ID Application: Dropbox, Inc. (G7HH3F8CAK)',
     'Developer ID Application: EnterpriseDB Corporation (26QKX55P9K)',
+    'Developer ID Application: Epic Games International, S.a.r.l. (96DBZ92D3Y)',
     'Developer ID Application: Figma, Inc. (T8RA8NE3B7)',
     'Developer ID Application: GEORGE NACHMAN (H7V7XYVQ7D)',
     'Developer ID Application: Google LLC (EQHXZ8M8AV)',
     'Developer ID Application: Hashicorp, Inc. (D38WU7D763)',
-    'Developer ID Application: Sublime HQ Pty Ltd (Z6D26JE4Y4)',
-    'Developer ID Application: Logitech Inc. (QED4VVPZWA)',
+    'Developer ID Application: Hercules Labs Inc. (B8PC799ZGU)',
     'Developer ID Application: JetBrains s.r.o. (2ZEFAR8TH3)',
+    'Developer ID Application: Logitech Inc. (QED4VVPZWA)',
     'Developer ID Application: Microsoft Corporation (UBF8T346G9)',
     'Developer ID Application: Node.js Foundation (HX7739G8FX)',
     'Developer ID Application: Objective Development Software GmbH (MLZF7K7B5R)',
     'Developer ID Application: Objective-See, LLC (VBG97UB4TA)',
     'Developer ID Application: Opal Camera Inc (97Z3HJWCRT)',
     'Developer ID Application: Oracle America, Inc. (VB5E2TV963)',
+    'Developer ID Application: Sublime HQ Pty Ltd (Z6D26JE4Y4)',
     'Developer ID Application: TablePlus Inc (3X57WP8E8V)',
     'Developer ID Application: Tenable, Inc. (4B8J598M7U)',
     'Developer ID Application: Valve Corporation (MXGJJ98X76)',

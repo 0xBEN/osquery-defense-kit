@@ -59,7 +59,9 @@ WHERE
     '/usr/bin/gnome-shell',
     '/usr/bin/ibus-daemon',
     '/usr/bin/kitty',
+    '/usr/lib/electron22/electron',
     '/usr/bin/osqueryd',
+    '/usr/libexec/gvfsd',
     '/usr/bin/sudo',
     '/usr/bin/tmux',
     '/usr/bin/yay',
@@ -75,15 +77,17 @@ WHERE
     '/usr/share/code/code'
   ) -- long-running launchers
   AND NOT p1.name IN (
+    'bash',
+    'dnf',
+    'electron',
+    'fish',
+    'gnome-shell',
+    'kubelet',
+    'kube-proxy',
     'lightdm',
     'nvim',
     'sh',
-    'gnome-shell',
-    'fish',
-    'bash',
-    'slack',
-    'kube-proxy',
-    'kubelet'
+    'slack'
   ) -- These alerts were unfortunately useless - lots of spam on macOS
   AND NOT (
     p1.path LIKE '/app/%'
